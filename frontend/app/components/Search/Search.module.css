@@ -1,0 +1,35 @@
+.searchWrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--Main-Text-Black, #171717);
+    border-radius: 4px;
+    padding: 12px;
+    background: #fff;
+    width: 100%;
+    height: 48px;
+    gap: 12px;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  
+  .input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-family: Gilroy;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+    color: var(--Main-Text-Black, #171717);
+    background: transparent;
+  }
+  
+  .input::placeholder {
+    color: var(--Main-Grey-text-2, #9C9C9C);
+  }
+  
