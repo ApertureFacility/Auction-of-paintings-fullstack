@@ -1,15 +1,20 @@
-import Input from "../../Inputs/Inputs";
-import Button from "../../Button/Button";
-import styles from "./AuthModal.module.css";
+'use client'
+
+import Input from "../../Inputs/Inputs"
+import Button from "../../Button/Button"
+import styles from "./AuthModal.module.css"
+import { useModalStore } from "../../../lib/modalStore" 
 
 export default function AuthModal({
   isOpen,
   onClose,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }) {
-  if (!isOpen) return null;
+  const openModal = useModalStore((state) => state.open) 
+
+  if (!isOpen) return null
 
   return (
     <div className={styles.backdrop}>
@@ -29,10 +34,17 @@ export default function AuthModal({
         </p>
         <Input placeholder="Введите email" type="email" />
         <Input placeholder="Введите пароль" type="password" />
-        <button className={styles.forgotPassword}>Забыли пароль?</button>
+        
+        <button
+          className={styles.forgotPassword}
+          onClick={() => openModal('forgot-password')}
+        >
+          Забыли пароль?
+        </button>
+
         <Button variant="secondary">Авторизироваться</Button>
         <Button>Создать новый аккаунт</Button>
       </div>
     </div>
-  );
+  )
 }

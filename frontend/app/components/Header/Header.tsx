@@ -1,10 +1,13 @@
-"use client";
+"use client"
 
-import styles from "./Header.module.css";
-import SearchInput from "../Search/Search";
-import { ChangeEvent } from "react";
+import styles from "./Header.module.css"
+import SearchInput from "../Search/Search"
+import { ChangeEvent } from "react"
+import { useModalStore } from "../../lib/modalStore"
 
 const Header = () => {
+  const openModal = useModalStore((state) => state.open)
+
   return (
     <header className={styles.header}>
       <div className={styles.logo}>AUCTION.COM</div>
@@ -17,7 +20,10 @@ const Header = () => {
       </nav>
       <div className={styles.right}>
         <div className={styles.rigt_part}>
-          <button className={styles.authButton}>
+          <button
+            className={styles.authButton}
+            onClick={() => openModal("login")}
+          >
             <img src="/login.svg" alt="auth" />
             <span>Авторизация</span>
           </button>
@@ -30,11 +36,11 @@ const Header = () => {
       <SearchInput
         value={""}
         onChange={function (e: ChangeEvent<HTMLInputElement>): void {
-          throw new Error("Function not implemented.");
+          throw new Error("Function not implemented.")
         }}
       />
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

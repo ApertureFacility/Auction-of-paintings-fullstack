@@ -7,7 +7,7 @@ interface InputProps {
   placeholder?: string;
   label?: string;
   disabled?: boolean;
-  type?: "text" | "password" | "email";
+  type?: "text" | "password" | "email" | "tel";
   variant?: "default" | "blackBorder";
 }
 

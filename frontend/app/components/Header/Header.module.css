@@ -88,6 +88,7 @@
     line-height: 125%;
     text-transform: uppercase;
     margin-right: 40px;
+    cursor: pointer;
   }
   @media (min-width: 1340px) {
     .header {
