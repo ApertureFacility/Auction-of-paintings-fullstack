@@ -6,7 +6,6 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
-  border: solid red 2px;
 }
 
 .column {
