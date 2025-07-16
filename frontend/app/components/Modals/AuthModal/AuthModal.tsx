@@ -43,7 +43,7 @@ export default function AuthModal({
         </button>
 
         <Button variant="secondary">Авторизироваться</Button>
-        <Button>Создать новый аккаунт</Button>
+        <Button onClick={() => openModal('registration')}>Создать новый аккаунт</Button>
       </div>
     </div>
   )

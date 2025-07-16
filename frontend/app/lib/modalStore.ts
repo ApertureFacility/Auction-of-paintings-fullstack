@@ -1,7 +1,7 @@
 
 import { create } from 'zustand'
 
-type ModalType = 'login' | 'forgot-password' | null
+type ModalType = 'login' | 'forgot-password' |'registration' | null
 
 interface ModalStore {
   openModal: ModalType
