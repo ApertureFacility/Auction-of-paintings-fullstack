@@ -1,5 +1,5 @@
 .searchWrapper {
-    display: flex;
+    display: none;
     align-items: center;
     border: 1px solid var(--Main-Text-Black, #171717);
     border-radius: 4px;
@@ -32,4 +32,4 @@
   .input::placeholder {
     color: var(--Main-Grey-text-2, #9C9C9C);
   }
-  
+ 
