@@ -1,4 +1,4 @@
-# === Frontend (React/Next.js/Vue/etc.) ===
+# === Frontend ===
 frontend/node_modules/
 frontend/.pnp
 frontend/.pnp.*
@@ -22,7 +22,7 @@ frontend/.vercel/
 frontend/*.tsbuildinfo
 frontend/next-env.d.ts
 
-# === Backend (Python) ===
+# === Backend  ===
 backend/venv/
 backend/__pycache__/
 backend/*.pyc
@@ -31,8 +31,9 @@ backend/.env
 backend/db.sqlite3  # Для Django
 backend/media/      # Для Django
 
-# === Общие правила ===
+
 .DS_Store
 .idea/
 .vscode/
 *.log
+backend/app/__pycache__/main.cpython-311.pyc
