@@ -9,6 +9,7 @@ const Header = () => {
   const openModal = useModalStore((state) => state.open)
 
   return (
+    <>
     <header className={styles.header}>
       <div className={styles.logo}>AUCTION.COM</div>
       <nav className={styles.nav}>
@@ -40,6 +41,12 @@ const Header = () => {
         }}
       />
     </header>
+    <img
+    src="/HeaderPic2.png"
+    alt="Header Background"
+    className={styles.headerImage}
+  />
+  </>
   )
 }
 
