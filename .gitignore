@@ -39,3 +39,5 @@ backend/media/      # Для Django
 .vscode/
 *.log
 backend/app/__pycache__/main.cpython-311.pyc
+backend/certs/jwt-private.pem
+backend/certs/jwt-public.pem
