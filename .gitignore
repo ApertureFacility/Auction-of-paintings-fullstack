@@ -41,3 +41,7 @@ backend/media/      # Для Django
 backend/app/__pycache__/main.cpython-311.pyc
 backend/certs/jwt-private.pem
 backend/certs/jwt-public.pem
+backend/src/core/__pycache__/db.cpython-311.pyc
+backend/src/core/__pycache__/config.cpython-311.pyc
+backend/src/api/__pycache__/test.cpython-311.pyc
+backend/src/__pycache__/main.cpython-311.pyc

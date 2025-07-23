@@ -1,5 +1,5 @@
 from typing import Union
-from app.api import test
+from .api import test 
 
 from fastapi import FastAPI
 

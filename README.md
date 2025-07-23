@@ -1,6 +1,6 @@
 ﻿# Auction-of-paintings-fullstack
 
-Start:poetry run uvicorn app.main:app --reload
+Start:poetry run uvicorn src.main:app --reload
 
 ## 🔧 Технологический стек
 
