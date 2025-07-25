@@ -45,13 +45,18 @@ typer = "0.16.0"
 typing-inspection = "0.4.1"
 typing-extensions = "4.14.1"
 urllib3 = "2.5.0"
-uvicorn = "0.35.0"
 watchfiles = "1.1.0"
 websockets = "15.0.1"
 fastapi-users = {extras = ["sqlalchemy"], version = "^14.0.1"}
 alembic = "^1.16.4"
 sqlalchemy = "^2.0.41"
 asyncpg = "^0.30.0"
+pydantic-settings = "^2.10.1"
+uvicorn = {extras = ["standard"], version = "^0.35.0"}
+psycopg2-binary = "^2.9.10"
+
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.16.4"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
