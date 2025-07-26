@@ -4,6 +4,7 @@ import styles from "./Header.module.css"
 import SearchInput from "../Search/Search"
 import { ChangeEvent } from "react"
 import { useModalStore } from "../../lib/modalStore"
+import Link from "next/link"
 
 const Header = () => {
   const openModal = useModalStore((state) => state.open)
@@ -11,7 +12,9 @@ const Header = () => {
   return (
     <>
     <header className={styles.header}>
-      <div className={styles.logo}>AUCTION.COM</div>
+    <Link href="/" className={styles.logo}>
+          AUCTION.COM
+        </Link>
       <nav className={styles.nav}>
         <a href="#">preferred access</a>
         <a href="#">about</a>
@@ -41,6 +44,7 @@ const Header = () => {
         }}
       />
     </header>
+    <span className={styles.headerText}>Тайна затерянных сокровищ самого известного императора ацтеков — Монтесумы</span>
     <img
     src="/HeaderPic2.png"
     alt="Header Background"
