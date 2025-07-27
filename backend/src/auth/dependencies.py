@@ -1,14 +1,11 @@
 import uuid
 from fastapi_users import FastAPIUsers
-from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.authentication import BearerTransport, AuthenticationBackend, JWTStrategy
-from src.core.db import async_session_maker
 from .models import User
 from .manager import get_user_manager
 from src.core.config import settings
 
 
-# Транспорт — авторизация через JWT в заголовке
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 

@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi_users.db import SQLAlchemyUserDatabase
 from src.core.db import async_session_maker
 from .models import User

@@ -20,9 +20,7 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
         back_populates="favorited_by"
     )
     
-    # Добавляем это отношение
     lots: Mapped[list["Lot"]] = relationship(
         back_populates="owner",
         foreign_keys="Lot.owner_id"
     )
-from src.models import Purchase, Lot
