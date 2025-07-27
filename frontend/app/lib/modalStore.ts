@@ -1,16 +1,18 @@
-
+// lib/modalStore.ts
 import { create } from 'zustand'
 
-type ModalType = 'login' | 'forgot-password' |'registration' | null
+type ModalType = 'login' | 'forgot-password' | 'registration' | 'image-zoom' | null
 
 interface ModalStore {
   openModal: ModalType
-  open: (modalName: ModalType) => void
+  modalData?: any
+  open: (modalName: ModalType, data?: any) => void
   close: () => void
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
   openModal: null,
-  open: (modalName) => set({ openModal: modalName }),
-  close: () => set({ openModal: null }),
+  modalData: null,
+  open: (modalName, data) => set({ openModal: modalName, modalData: data }),
+  close: () => set({ openModal: null, modalData: null }),
 }))

@@ -1,0 +1,105 @@
+.card {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  height: 407px;
+  padding: 10px;
+  margin-top: 60px;
+  width: 270px;
+}
+
+.image {
+  width: 250px;
+  height: 267px;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+  color: var(--Main-Text-Black, #171717);
+}
+.authorWrapper {
+  display: none;
+}
+
+.authorRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  margin: 20px 0px 10px 0px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #808080;
+  text-transform: uppercase;
+}
+
+.author {
+  font-size: 14px;
+  font-weight: bold;
+  color: #4f7b9e;
+  text-transform: uppercase;
+}
+
+.price_wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.price_wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #4f7b9e;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+.iconZoom,
+.iconStar {
+  position: absolute;
+  top: 8px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.iconZoom {
+  right: 8px;
+}
+
+.iconStar {
+  right: 40px;
+}
+.imageWrapper {
+  position: relative;
+  width: 252px;
+  height: 267px;
+  margin-bottom: 12px;
+}
