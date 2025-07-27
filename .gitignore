@@ -57,3 +57,5 @@ alembic/**/__pycache__/
 # Environments
 venv/
 .env
+frontend/package-lock.json
+
