@@ -1,4 +1,3 @@
-from typing import Union
 from .api import test 
 from .auth.router import router as auth_router
 from fastapi import FastAPI

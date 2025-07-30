@@ -9,8 +9,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timedelta
-
-
 from src.core.db import Base
 
 
