@@ -5,12 +5,14 @@ interface ButtonProps {
     children: ReactNode;
     onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
     variant?: 'primary' | 'secondary';
+    disabled?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({ 
     children, 
     onClick, 
-    variant = 'primary' 
+    variant = 'primary'
+     
 }) => {
     const buttonClass = `${styles.button} ${styles[variant]}`;
     

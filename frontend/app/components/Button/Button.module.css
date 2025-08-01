@@ -29,4 +29,8 @@
     background: var(--Main-White, #FFF);
     color: var(--Main-Text-Black, #171717);
 }
-
+@media (min-width: 376px) {
+    .button {
+        width: 100%;
+      }
+    }
