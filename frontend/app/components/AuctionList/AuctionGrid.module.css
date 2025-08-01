@@ -3,6 +3,7 @@
   max-width: 1200px;
   border-top: 1px solid var(--Main-Grey-border, #dbdbdb);
   margin-top: 30px;
+  height: max-content
 }
 
 .heading {
