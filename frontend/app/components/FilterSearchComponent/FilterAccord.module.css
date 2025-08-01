@@ -1,0 +1,29 @@
+
+.filter__title {
+    display: inline-block;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .accordion_toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.5rem 0;
+    cursor: pointer;
+  }
+  
+  .filter__icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+  }
+  
+  .rotated {
+    transform: rotate(180deg);
+  }
