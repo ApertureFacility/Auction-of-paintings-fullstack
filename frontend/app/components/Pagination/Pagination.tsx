@@ -1,23 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./Pagination.module.css";
 
 interface PaginationProps {
-  totalPages?: number;
-  initialPage?: number;
-  onPageChange?: (page: number) => void;
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
-  totalPages = 3,
-  initialPage = 1,
+  totalPages,
+  currentPage,
   onPageChange,
 }) => {
-  const [currentPage, setCurrentPage] = useState(initialPage);
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-    onPageChange?.(page);
+    onPageChange(page);
   };
 
   return (
@@ -63,3 +60,4 @@ const Pagination: React.FC<PaginationProps> = ({
 };
 
 export default Pagination;
+
