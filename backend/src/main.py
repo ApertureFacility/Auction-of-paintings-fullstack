@@ -13,10 +13,11 @@ app.include_router(auth_router)
 app.include_router(lots_router)
 
 # CORS настройки
-origins = [
-    "http://localhost:3000",  # React frontend
-    "http://127.0.0.1:3000",
-]
+origins =[
+        "http://localhost:3000",      
+        "http://192.168.100.5:3000"
+    
+    ]
 
 app.add_middleware(
     CORSMiddleware,
