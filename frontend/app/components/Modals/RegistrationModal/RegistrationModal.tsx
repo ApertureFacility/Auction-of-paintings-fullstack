@@ -5,7 +5,7 @@ import Input from "../../Inputs/Inputs"
 import Button from "../../Button/Button"
 import styles from "./RegModal.module.css"
 import Checkbox from "../../CheckBox/Checkbox"
-import { registerUser } from "../../requests/Auth"
+import { loginUser, registerUser } from "../../../apiRequests/userRequests"
 
 export default function RegistrationModal({
   isOpen,
@@ -27,24 +27,24 @@ export default function RegistrationModal({
 
   const handleRegister = async () => {
     setError("")
-
+  
     if (!email || !password || !confirmPassword) {
       setError("Заполните все поля")
       return
     }
-
+  
     if (password !== confirmPassword) {
       setError("Пароли не совпадают")
       return
     }
-
+  
     if (!agree) {
       setError("Необходимо согласиться с правилами")
       return
     }
-
+  
     setLoading(true)
-
+  
     try {
       await registerUser({
         email,
@@ -54,7 +54,9 @@ export default function RegistrationModal({
         is_superuser: false,
         is_verified: false,
       })
-
+  
+      await loginUser({ email, password })
+  
       onClose()
     } catch (err: any) {
       setError(err.message || "Ошибка регистрации")
@@ -62,6 +64,7 @@ export default function RegistrationModal({
       setLoading(false)
     }
   }
+  
 
   return (
     <div className={styles.backdrop}>
