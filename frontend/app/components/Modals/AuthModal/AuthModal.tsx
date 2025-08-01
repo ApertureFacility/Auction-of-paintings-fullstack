@@ -1,20 +1,57 @@
-'use client'
+"use client";
 
-import Input from "../../Inputs/Inputs"
-import Button from "../../Button/Button"
-import styles from "./AuthModal.module.css"
-import { useModalStore } from "../../../lib/modalStore" 
+import Input from "../../Inputs/Inputs";
+import Button from "../../Button/Button";
+import styles from "./AuthModal.module.css";
+import { useModalStore } from "../../../lib/modalStore";
+import { useState, useEffect } from "react";
+import { loginUser } from "../../../apiRequests/userRequests";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function AuthModal({
   isOpen,
   onClose,
 }: {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }) {
-  const openModal = useModalStore((state) => state.open) 
+  const router = useRouter();
+  const pathname = usePathname();
+  const openModal = useModalStore((state) => state.open);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null
+  useEffect(() => {
+    if (isOpen && !pathname.includes("/login")) {
+      router.push(`${pathname}?modal=login`, { scroll: false });
+    }
+  }, [isOpen, pathname, router]);
+
+  const handleClose = () => {
+    router.back();
+    onClose();
+  };
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Не введены логин и(или) пароль");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await loginUser({ email, password });
+      handleClose();
+    } catch (err: any) {
+      setError(err.message || "Ошибка авторизации");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className={styles.backdrop}>
@@ -32,19 +69,38 @@ export default function AuthModal({
           Войдите в свою учетную запись, чтобы делать ставки и регистрироваться
           для участия в продажах.
         </p>
-        <Input placeholder="Введите email" type="email" />
-        <Input placeholder="Введите пароль" type="password" />
-        
+        {error && <p className={styles.error}>{error}</p>}
+        <Input
+          placeholder="Введите email"
+          type="email"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
+        />
+        <Input
+          placeholder="Введите пароль"
+          type="password"
+          value={password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
+        />
+
         <button
           className={styles.forgotPassword}
-          onClick={() => openModal('forgot-password')}
+          onClick={() => openModal("forgot-password")}
         >
           Забыли пароль?
         </button>
 
-        <Button variant="secondary">Авторизироваться</Button>
-        <Button onClick={() => openModal('registration')}>Создать новый аккаунт</Button>
+        <Button variant="secondary" onClick={handleLogin} disabled={loading}>
+          {loading ? "Загрузка..." : "Авторизироваться"}
+        </Button>
+        <Button onClick={() => openModal("registration")}>
+          Создать новый аккаунт
+        </Button>
       </div>
     </div>
-  )
+  );
 }
