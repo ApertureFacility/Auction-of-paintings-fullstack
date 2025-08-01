@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from .schemas import LotCreate, LotRead
+from .schemas import LotCreate, LotListResponse, LotRead
 from src.models import Lot
 from src.core.db import get_db
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 router = APIRouter(prefix="/lots", tags=["Lots"])
 
@@ -23,10 +23,20 @@ async def create_lot(lot: LotCreate, db: AsyncSession = Depends(get_db)):
     await db.refresh(new_lot)
     return new_lot
 
-@router.get("/", response_model=list[LotRead])
-async def read_lots(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Lot))
-    return result.scalars().all()
+@router.get("/", response_model=LotListResponse)
+async def read_lots(
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(6, ge=1),
+    offset: int = Query(0, ge=0)
+):
+    result = await db.execute(select(Lot).limit(limit).offset(offset))
+    lots = result.scalars().all()
+
+    total_result = await db.execute(select(func.count()).select_from(Lot))
+    total = total_result.scalar()
+
+    return {"items": lots, "total": total}
+
 
 @router.get("/{lot_id}", response_model=LotRead)
 async def read_lot(lot_id: int, db: AsyncSession = Depends(get_db)):

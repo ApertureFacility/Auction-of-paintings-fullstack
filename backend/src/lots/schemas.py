@@ -36,3 +36,7 @@ class LotRead(LotBase):
     owner: Optional[UserRef] = None
 
     model_config = ConfigDict(from_attributes=True)
+    
+class LotListResponse(BaseModel):
+    items: List[LotRead]
+    total: int
