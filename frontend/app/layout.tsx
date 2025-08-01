@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import ModalManager from "./components/Modals/ModalManager";
+import { ImageZoomModal } from "./components/Modals/ImageZoomModal/ImageZoomModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,12 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-    <body>
-      <Header />
-      <ModalManager />
-      <main>{children}</main>
-      <Footer />
-    </body>
-  </html>
+      <body>
+        <Header />
+        <ModalManager />
+        <ImageZoomModal />
+        <main>{children}</main>
+        <Footer />
+      </body>
+    </html>
   );
 }
