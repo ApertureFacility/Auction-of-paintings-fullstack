@@ -3,14 +3,18 @@ from .auth.router import router as auth_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .lots.routers import router as lots_router
+from src.favorites.router import router as favorites_router
+
 
 
 app = FastAPI()
+
 
 # Роутеры
 app.include_router(test.router)
 app.include_router(auth_router)
 app.include_router(lots_router)
+app.include_router(favorites_router)
 
 # CORS настройки
 origins =[

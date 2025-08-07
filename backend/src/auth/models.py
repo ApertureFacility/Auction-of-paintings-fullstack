@@ -1,6 +1,8 @@
-from fastapi_users.db import SQLAlchemyBaseUserTable
+from __future__ import annotations  
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer
+from src.models import Lot, Purchase
 from src.core.db import Base
 
 class User(Base, SQLAlchemyBaseUserTable[int]):

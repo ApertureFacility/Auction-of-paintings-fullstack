@@ -31,9 +31,8 @@ class PurchaseRef(BaseModel):
 class LotRead(LotBase):
     id: int
     created_at: datetime
-    favorited_by: Optional[List[UserRef]] = None
     purchase: Optional[PurchaseRef] = None
-    owner: Optional[UserRef] = None
+
 
     model_config = ConfigDict(from_attributes=True)
     
