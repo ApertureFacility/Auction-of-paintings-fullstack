@@ -7,6 +7,7 @@ import { useModalStore } from "../../../lib/modalStore";
 import { useState, useEffect } from "react";
 import { loginUser } from "../../../apiRequests/userRequests";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuthStore } from "../../../lib/authStore"; 
 
 export default function AuthModal({
   isOpen,
@@ -18,6 +19,9 @@ export default function AuthModal({
   const router = useRouter();
   const pathname = usePathname();
   const openModal = useModalStore((state) => state.open);
+
+  const { login } = useAuthStore(); 
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -42,8 +46,14 @@ export default function AuthModal({
 
     try {
       setLoading(true);
-      await loginUser({ email, password });
-      handleClose();
+      const { access_token } = await loginUser({ email, password });
+
+      const success = await login(access_token);
+      if (success) {
+        handleClose();
+      } else {
+        setError("Ошибка авторизации");
+      }
     } catch (err: any) {
       setError(err.message || "Ошибка авторизации");
     } finally {
