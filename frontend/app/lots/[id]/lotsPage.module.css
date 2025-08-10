@@ -1,0 +1,9 @@
+.layout_container {
+    display: flex;
+    margin: 0px 170px;
+  }
+  @media (max-width: 768px) {
+    .layout_container {
+      margin: 10px;
+    }
+   }
