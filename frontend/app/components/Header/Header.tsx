@@ -48,8 +48,6 @@ const Header = () => {
               <span>Выйти</span>
             </button>
           )}
-
-          <img src="/lupa.svg" alt="Поиск" className={styles.icon} />
           <img src="/star.svg" alt="Избранное" className={styles.iconStar} />
         </div>
 
