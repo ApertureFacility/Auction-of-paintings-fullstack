@@ -15,9 +15,15 @@ export interface LotResponse {
     total: number;
   }
 
-export  type AuctionLotCardProps = {
+  export interface AuctionLotCardProps {
     lot: LotSmallCard;
-  };
+    onRemoveFavorite?: (id: number) => void;
+    isFavorite?: boolean;
+  }
+  
+  
+  
+  
 
 export interface LotSingleDetailedCard  {
   id: number;

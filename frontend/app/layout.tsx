@@ -5,6 +5,7 @@ import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import ModalManager from "./components/Modals/ModalManager";
 import { ImageZoomModal } from "./components/Modals/ImageZoomModal/ImageZoomModal";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="ru">
       <body>
         <Header />
+        <ToastContainer/>
         <ModalManager />
         <ImageZoomModal />
         <main>{children}</main>
