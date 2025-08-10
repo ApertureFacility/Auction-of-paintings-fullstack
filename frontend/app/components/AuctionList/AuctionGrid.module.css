@@ -38,7 +38,7 @@
 @media (min-width: 1024px) {
   .grid {
     margin-left: 165px;
-    max-width: 825px;
+    width: 825px;
     grid-template-columns: repeat(3, 1fr);
     margin: 30px;
   }

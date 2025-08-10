@@ -1,0 +1,105 @@
+.filter {
+  
+    margin: 20px;
+  }
+  
+  .filter__contacts_wrapper {
+    padding: 30px;
+    background-color: #f8f8f8;
+  }
+  
+  .filter__title {
+    color: var(--Main-Text-Black, #171717);
+    text-align: left;
+    font-family: Gilroy;
+    font-size: 29px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: uppercase;
+    margin: 40px 0px 5px 0px;
+  }
+  
+  .filter__clear_button {
+    color: var(--Main-Text-Black, #171717);
+    font-family: Gilroy;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration-line: underline;
+    text-transform: uppercase;
+    background-color: transparent;
+    border: none;
+    margin-bottom: 40px;
+    cursor: pointer;
+  }
+  
+  .filter__section_title {
+    color: var(--Basic-Black, #000);
+    font-family: Gilroy;
+    font-size: 29px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: uppercase;
+    margin-top: 60px;
+  }
+  
+  .filter__heading {
+    color: var(--Main-Dark-Grey-text, #4b4b4b);
+    text-align: justify;
+    font-family: Gilroy;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+  }
+  
+  .filter__text {
+    color: var(--Main-Dark-Grey-text, #4b4b4b);
+    font-family: Gilroy;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+    margin: 10px 0px 10px 0px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .filter__text_heading {
+    color: var(--Main-Dark-Grey-text, #4b4b4b);
+    font-family: Gilroy;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+    margin: 0px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .filter__text_reg {
+    color: var(--Main-Grey-text-2, #9c9c9c);
+    text-align: justify;
+    font-family: Gilroy;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+    margin: 20px 0px 20px 0px;
+  }
+  
+  .filter__date_text {
+    color: #4f7b9e;
+    margin-left: auto;
+  }
+  
+  .filter__auc_wrapper {
+    display: flex;
+    margin: 20px 0px 20px 0px;
+  }
+  

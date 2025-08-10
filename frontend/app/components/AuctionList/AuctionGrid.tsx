@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./AuctionGrid.module.css";
 import Pagination from "../Pagination/Pagination";
-import { fetchLots } from "../../apiRequests/lotsRequests";
+import { fetchLots, fetchLotsSearch } from "../../apiRequests/lotsRequests";
 import { LotSmallCard } from "@/app/interfaces/ILot";
 import AuctionLotCardSmall from "./AuctionLotCard";
 import Loader from "../Loader/Loader";
@@ -14,18 +14,25 @@ const AuctionGrid: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
     const loadLots = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const data = await fetchLots(currentPage, LOTS_PER_PAGE);
+        let data;
+        if (searchQuery) {
+          data = await fetchLotsSearch(searchQuery, currentPage, LOTS_PER_PAGE);
+        } else {
+          data = await fetchLots(currentPage, LOTS_PER_PAGE);
+        }
         setLots(data.items);
         setTotalPages(Math.ceil(data.total / LOTS_PER_PAGE));
       } catch (err) {
@@ -36,21 +43,25 @@ const AuctionGrid: React.FC = () => {
     };
 
     loadLots();
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
+    params.set("page", page.toString());
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className={styles.wrapper}>
         <Loader />
       </div>
     );
-  if (error) return <div className={styles.wrapper}>Ошибка: {error}</div>;
+  }
+
+  if (error) {
+    return <div className={styles.wrapper}>Ошибка: {error}</div>;
+  }
 
   return (
     <div className={styles.wrapper}>

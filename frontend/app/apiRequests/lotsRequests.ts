@@ -35,3 +35,12 @@ export const fetchLots = async (
   }
   return response.json();
 };
+
+export async function fetchLotsSearch(search: string, page: number, limit: number) {
+  const offset = (page - 1) * limit;
+  const res = await fetch(
+    `${API_URL}/lots/search?q=${encodeURIComponent(search)}&limit=${limit}&offset=${offset}`
+  );
+  if (!res.ok) throw new Error(`Ошибка загрузки данных: ${res.status}`);
+  return res.json();
+}
