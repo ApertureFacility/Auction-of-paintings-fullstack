@@ -1,3 +1,4 @@
+import random
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -11,6 +12,30 @@ def parse_auction_name(soup):
             if value:
                 return value.text.strip()
     return None
+
+def parse_description(soup):
+    main_content = soup.select_one("div.main_content")
+    if not main_content:
+        description_div = soup.select_one("div.editable_block.with_editor_panel")
+        if description_div:
+            paragraphs = description_div.find_all(["p", "div"], recursive=False)
+            clean_paragraphs = [p.get_text(" ", strip=True) for p in paragraphs if p.get_text(strip=True)]
+            return "\n\n".join(clean_paragraphs[:2])
+        return None
+    
+    texts = []
+
+    editable_blocks = main_content.select("div.editable_block.with_editor_panel")
+    for block in editable_blocks:
+        text = block.get_text(" ", strip=True)
+        if text:
+            texts.append(text)
+        if len(texts) >= 5:
+            break
+
+    return "\n\n".join(texts) if texts else None
+
+
 def parse_author(soup):
     author_element = soup.select_one("div.subject_info_block__authors a.subject_info_block__author")
     
@@ -76,13 +101,9 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
                     materials = val.text.strip()
                 break
 
-        description_div = soup.select_one("div.editable_block.with_editor_panel")
-        if description_div:
-            paragraphs = description_div.find_all(["p", "div"], recursive=False)
-            clean_paragraphs = [p.get_text(" ", strip=True) for p in paragraphs if p.get_text(strip=True)]
-            description = "\n\n".join(clean_paragraphs[:2])
-        else:
-            description = None
+        description = parse_description(soup)
+        start_price = random.randint(0, 1000)
+
 
         image = soup.select_one("img#point_test_image")
         if image:
@@ -105,7 +126,8 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
             "description": description,
             "image_url": image_url,
             "auction_name": auction_name,
-            "lot_author": author
+            "lot_author": author,
+             "start_price": start_price
         }
     
     except Exception as e:
