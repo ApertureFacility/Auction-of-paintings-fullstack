@@ -7,7 +7,11 @@ from .favorites.router import router as favorites_router
 from .auction.websocket import websocket_router
 from .core.config import settings
 
-app = FastAPI()
+app  = FastAPI(
+    title="Auction API",
+    version="0.2.0",
+)
+
 
 # --- CORS ---
 app.add_middleware(

@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import String, cast, func, or_, select
 from .schemas import LotCreate, LotListResponse, LotRead
 from src.models import Lot
 from src.core.db import get_db
-from sqlalchemy import func, select
 
 router = APIRouter(prefix="/lots", tags=["Lots"])
+
+
 
 @router.post("/", response_model=LotRead)
 async def create_lot(lot: LotCreate, db: AsyncSession = Depends(get_db)):
@@ -15,13 +17,61 @@ async def create_lot(lot: LotCreate, db: AsyncSession = Depends(get_db)):
     if data.get("start_time") and data["start_time"].tzinfo is not None:
         data["start_time"] = data["start_time"].replace(tzinfo=None)
 
-
-
     new_lot = Lot(**data)
     db.add(new_lot)
     await db.commit()
     await db.refresh(new_lot)
     return new_lot
+
+
+
+@router.get("/search", response_model=LotListResponse)
+async def search_lots(
+    q: str = Query(..., description="Поиск по ID, названию или автору"),
+    limit: int = Query(6, ge=1),
+    offset: int = Query(0, ge=0),
+    session: AsyncSession = Depends(get_db)
+):
+    stmt = (
+        select(Lot)
+        .where(
+            or_(
+                cast(Lot.id, String).ilike(f"%{q}%"),
+                Lot.title.ilike(f"%{q}%"),
+                Lot.author.ilike(f"%{q}%")
+            )
+        )
+        .order_by(Lot.id.asc())
+        .limit(limit)
+        .offset(offset)
+    )
+
+    result = await session.execute(stmt)
+    lots = result.scalars().all()
+
+    total_stmt = (
+        select(func.count())
+        .select_from(
+            select(Lot)
+            .where(
+                or_(
+                    cast(Lot.id, String).ilike(f"%{q}%"),
+                    Lot.title.ilike(f"%{q}%"),
+                    Lot.author.ilike(f"%{q}%")
+                )
+            )
+            .subquery()
+        )
+    )
+    total_result = await session.execute(total_stmt)
+    total = total_result.scalar() or 0
+
+    return LotListResponse(
+        items=[LotRead.model_validate(lot) for lot in lots],
+        total=total
+    )
+
+
 
 @router.get("/", response_model=LotListResponse)
 async def read_lots(
