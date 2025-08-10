@@ -27,9 +27,6 @@
   margin-bottom: 4px;
   color: var(--Main-Text-Black, #171717);
 }
-.authorWrapper {
-  display: none;
-}
 
 .authorRow {
   display: flex;
