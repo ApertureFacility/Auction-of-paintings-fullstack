@@ -5,6 +5,7 @@ from .auth.router import router as auth_router
 from .lots.routers import router as lots_router
 from .favorites.router import router as favorites_router
 from .auction.websocket import websocket_router
+from .news import routes as news_routes
 from .core.config import settings
 
 app  = FastAPI(
@@ -28,6 +29,7 @@ app.include_router(auth_router)
 app.include_router(lots_router)
 app.include_router(favorites_router)
 app.include_router(websocket_router)
+app.include_router(news_routes.router)
 
 @app.get("/")
 def read_root():

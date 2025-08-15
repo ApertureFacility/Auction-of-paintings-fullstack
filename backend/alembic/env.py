@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import create_engine, engine_from_config
 from sqlalchemy import pool
 from src.core.db import Base
+from src.news.models import News 
 from alembic import context
 import sys
 import os
