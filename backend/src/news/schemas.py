@@ -21,7 +21,7 @@ class NewsOut(NewsBase):
     id: int
 
     class Config:
-        from_attributes = True  # для Pydantic v2
+        from_attributes = True  
 
 class NewsRead(NewsOut):
     pass
