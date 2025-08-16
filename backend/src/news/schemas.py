@@ -1,16 +1,22 @@
+from pydantic import BaseModel, field_validator
+from typing import Optional, Union
 from datetime import datetime
-from pydantic import BaseModel, HttpUrl
-from typing import Optional
 
 class NewsBase(BaseModel):
     big_title: str
     big_text: str
-    image1_url: Optional[HttpUrl] = None
+    image1_url: Optional[Union[str, None]] = None 
     small_title: Optional[str] = None
     small_text: Optional[str] = None
-    image2_url: Optional[HttpUrl] = None
+    image2_url: Optional[Union[str, None]] = None 
     published_at: Optional[datetime] = None
 
+    @field_validator('image1_url', 'image2_url')
+    def convert_url_to_str(cls, v):
+        if v is None:
+            return None
+        return str(v) 
+    
 class NewsCreate(NewsBase):
     pass  
 
