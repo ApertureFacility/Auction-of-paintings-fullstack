@@ -25,7 +25,7 @@ const Header = () => {
       <Link href="/" className={styles.logo}>AUCTION.COM</Link>
 
       <nav className={styles.nav}>
-        <a href="#">preferred access</a>
+      <Link href="/news">Новости</Link>
         <a href="#">about</a>
         <a href="#">discover</a>
         <a href="#">services</a>

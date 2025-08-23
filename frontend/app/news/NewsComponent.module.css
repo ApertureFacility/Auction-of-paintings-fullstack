@@ -1,0 +1,180 @@
+.container {
+    margin: 0 13%;
+    padding: 32px 16px;
+  }
+  
+  .center {
+    text-align: center;
+    padding: 32px 0;
+  }
+  
+  .error {
+    color: #e63946;
+  }
+  
+  .title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 32px;
+    text-align: left;
+
+  }
+  
+  .newsList {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  
+  .newsItem {
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+    padding: 16px 0;
+  }
+  
+  .newsRow {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .imageLeft {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  .textBlock {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+  }
+  
+  .bigTitle {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .bigText {
+    color: #4a4a4a;
+    margin-bottom: auto;
+    white-space: pre-line;
+  }
+  
+  .date {
+    font-size: 12px;
+    color: #9b9b9b;
+  }
+  
+  .separator {
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    margin-top: 16px;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .disabledBtn {
+    padding: 8px 16px;
+    background-color: #d1d1d1;
+    color: #888;
+    border-radius: 8px;
+    cursor: not-allowed;
+    border: none;
+  }
+  .textBlock {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: -webkit-fill-available;
+  }
+  
+  .dateRow {
+    display: flex;
+    align-items: center;
+    margin-top: auto; 
+  }
+  
+  .dateLabel {
+    font-size: 12px;
+    color: #9b9b9b;
+    margin-right: auto;
+  }
+  
+  .dateValue {
+    font-size: 12px;
+    color: #9b9b9b;
+  }
+  .calendarIco{width: 20px;
+  height: 20px;
+margin-right: 10px;}
+  
+  
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .imageLeft {
+      width: 120px;
+      height: 120px;
+    }
+  
+    .bigTitle {
+      font-size: 18px;
+    }
+  
+    .bigText {
+      font-size: 14px;
+    }
+  
+    .date {
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .newsRow {
+      flex-direction: column;
+    }
+  
+    .imageLeft {
+      width: 100%;
+      height: auto;
+    }
+  
+    .textBlock {
+      margin-top: 12px;
+    }
+  
+    .bigTitle {
+      font-size: 18px;
+    }
+  
+    .bigText {
+      font-size: 14px;
+    }
+  
+    .date {
+      font-size: 11px;
+    }
+  }
+  
