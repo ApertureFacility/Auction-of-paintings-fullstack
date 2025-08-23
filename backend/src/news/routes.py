@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from src.core.db import get_db
 from src.news.models import News
-from .schemas import NewsCreate, NewsRead
+from .schemas import NewsCreate, NewsRead, NewsUpdate
 
 router = APIRouter(prefix="/news", tags=["News"])
 
-@router.post("/", response_model=NewsRead)
+@router.post("/", response_model=NewsRead, status_code=status.HTTP_201_CREATED)
 async def create_news(news: NewsCreate, db: AsyncSession = Depends(get_db)):
-    new_news = News(**news.dict())
+    new_news = News(**news.model_dump())
     db.add(new_news)
     await db.commit()
     await db.refresh(new_news)
@@ -20,10 +20,61 @@ async def read_news(news_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(News).where(News.id == news_id))
     news_item = result.scalar_one_or_none()
     if not news_item:
-        raise HTTPException(status_code=404, detail="News not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="News not found"
+        )
     return news_item
 
 @router.get("/", response_model=list[NewsRead])
-async def read_all_news(db: AsyncSession = Depends(get_db), skip: int = 0, limit: int = 10):
+async def read_all_news(
+    db: AsyncSession = Depends(get_db),
+    skip: int = 0,
+    limit: int = Query(default=10, le=100)
+):
     result = await db.execute(select(News).offset(skip).limit(limit))
     return result.scalars().all()
+
+# Новые эндпоинты:
+
+@router.put("/{news_id}", response_model=NewsRead)
+async def update_news(
+    news_id: int,
+    news_data: NewsUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(News).where(News.id == news_id))
+    news_item = result.scalar_one_or_none()
+    
+    if not news_item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="News not found"
+        )
+    
+    # Обновляем только переданные поля
+    update_data = news_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(news_item, field, value)
+    
+    await db.commit()
+    await db.refresh(news_item)
+    return news_item
+
+@router.delete("/{news_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_news(
+    news_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(News).where(News.id == news_id))
+    news_item = result.scalar_one_or_none()
+    
+    if not news_item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="News not found"
+        )
+    
+    await db.delete(news_item)
+    await db.commit()
+    return None
