@@ -10,8 +10,11 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str
     POSTGRES_DB: str
     SECRET: str
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"] 
-    
+    CORS_ORIGINS: List[str] = [
+    "http://localhost:3000",
+    "http://192.168.100.5:3000"
+]
+
     @property
     def DATABASE_URL(self) -> str:
         return (
