@@ -52,8 +52,10 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
 
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://192.168.100.5:8000/ws/lots/${lot.id}`);
-
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsHost = window.location.host; 
+    const ws = new WebSocket(`${wsProtocol}://${wsHost.replace("3000", "8000")}/ws/lots/${lot.id}`);
+    
     ws.onopen = () => {
       console.log("WebSocket соединение установлено");
       setSocket(ws);
