@@ -19,3 +19,17 @@ export async function fetchAllNews(skip: number = 0, limit: number = 10): Promis
   
   return response.json();
 }
+
+export async function fetchNewsById(newsId: number): Promise<INews> {
+  const response = await fetch(`${API_URL}/news/${newsId}`, {
+    headers: { 
+      "Accept": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}

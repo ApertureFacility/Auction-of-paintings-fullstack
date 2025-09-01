@@ -1,0 +1,93 @@
+.container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+  
+  .title {
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 12px;
+  }
+  
+  .date {
+    margin: 0 0 24px;
+    color: #6b7280;
+    font-size: 14px;
+  }
+  
+  .heroImageWrap {
+    margin: 0 0 24px;
+  }
+  
+  .heroImage {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 16px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+  }
+  
+  .bigText {
+    font-size: 18px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+    color: #111827;
+  }
+  
+  .extraBlock {
+    margin-top: 32px;
+  }
+  
+  .extraImageWrap {
+    margin-bottom: 16px;
+  }
+  
+  .extraImage {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+  }
+  
+  .subTitle {
+    font-size: 22px;
+    line-height: 1.35;
+    font-weight: 600;
+    margin: 12px 0 6px;
+  }
+  
+  .smallText {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #374151;
+    margin: 0;
+  }
+  
+  .dateRow {
+    display: flex;
+    align-items: center;
+    margin:20px 0px; 
+  }
+  
+  .dateLabel {
+    font-size: 12px;
+    color: #9b9b9b;
+    margin-right: auto;
+  }
+  
+  .dateValue {
+    font-size: 12px;
+    color: #9b9b9b;
+  }
+  
+  @media (min-width: 768px) {
+    .title { font-size: 40px; }
+    .bigText { font-size: 20px; }
+    .subTitle { font-size: 24px; }
+  }
+  
