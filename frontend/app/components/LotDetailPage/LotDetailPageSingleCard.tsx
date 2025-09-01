@@ -29,6 +29,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const [bidAmount, setBidAmount] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [usersCount, setUsersCount] = useState(0);
 
   const [lastBidTime, setLastBidTime] = useState<number | null>(null);
   const [timerPercent, setTimerPercent] = useState(0);
@@ -69,8 +70,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-
+    
       if (Array.isArray(data)) {
         setBids(data);
         if (data.length > 0) {
@@ -78,8 +78,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         }
         return;
       }
-
-  
+    
       if (data.type === "NEW_BID" && data.bid) {
         const newBid: Bid = {
           id: data.bid.id,
@@ -91,7 +90,12 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         setCurrentPrice(data.bid.amount);
         return;
       }
+    
+      if (data.type === "USERS_COUNT") {
+        setUsersCount(data.count);
+      }
     };
+    
 
     ws.onerror = (error) => {
       console.error("WebSocket ошибка:", error);
@@ -241,7 +245,8 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
           </p>
 
           <p className={styles.time}>Стартует: {formatDate(lot.start_time)}</p>
-          <p>Количество участников</p>
+          <p>Количество участников: {usersCount}</p>
+
         </section>
 
         <div className={styles.timerWrapper}>
