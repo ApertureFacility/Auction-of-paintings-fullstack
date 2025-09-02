@@ -33,3 +33,17 @@ export async function fetchNewsById(newsId: number): Promise<INews> {
 
   return response.json();
 }
+
+export async function fetchLatestNews(): Promise<INews> {
+  const response = await fetch(`${API_URL}/news/latest`, {
+    headers: { 
+      "Accept": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
