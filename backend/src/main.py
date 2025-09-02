@@ -10,7 +10,7 @@ from .core.config import settings
 
 app  = FastAPI(
     title="Auction API",
-    version="0.2.1",
+    version="0.2.2",
 )
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.db import get_db
@@ -14,6 +14,19 @@ async def create_news(news: NewsCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(new_news)
     return new_news
+
+@router.get("/latest", response_model=NewsRead)
+async def get_latest_news(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(News).order_by(desc(News.published_at)).limit(1)
+    )
+    latest_news = result.scalar_one_or_none()
+    if not latest_news:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No news found"
+        )
+    return latest_news
 
 @router.get("/{news_id}", response_model=NewsRead)
 async def read_news(news_id: int, db: AsyncSession = Depends(get_db)):
@@ -35,7 +48,6 @@ async def read_all_news(
     result = await db.execute(select(News).offset(skip).limit(limit))
     return result.scalars().all()
 
-# Новые эндпоинты:
 
 @router.put("/{news_id}", response_model=NewsRead)
 async def update_news(
@@ -52,7 +64,7 @@ async def update_news(
             detail="News not found"
         )
     
-    # Обновляем только переданные поля
+
     update_data = news_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(news_item, field, value)
