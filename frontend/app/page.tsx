@@ -1,8 +1,11 @@
 "use client";
+
+import { Suspense } from "react";
 import AuctionGrid from "./components/AuctionList/AuctionGrid";
 import FilterComponent from "./components/FilterSearchComponent/FilterComponent";
 import HiglightNews from "./components/News/HiglightNews";
 import styles from "./page.module.css";
+import Loader from "./components/Loader/Loader";
 
 export default function Home() {
   return (
@@ -18,11 +21,17 @@ export default function Home() {
       />
       <section>
         <div className={styles.layout_container}>
-          <AuctionGrid />
-          <FilterComponent />
+          <Suspense fallback={<div><Loader /></div>}>
+            <AuctionGrid />
+          </Suspense>
+          <Suspense fallback={<div><Loader /></div>}>
+            <FilterComponent />
+          </Suspense>
         </div>
         <div className={styles.margin_container}>
-          <HiglightNews />
+          <Suspense fallback={<div><Loader /></div>}>
+            <HiglightNews />
+          </Suspense>
         </div>
       </section>
     </>

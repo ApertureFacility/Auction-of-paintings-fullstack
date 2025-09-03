@@ -1,18 +1,13 @@
-import styles from "./SoloNewsPage.module.css"
+import styles from "./SoloNewsPage.module.css";
 import { fetchNewsById } from "@/app/apiRequests/newsRequests";
 
-interface NewsPageProps {
-  params: { id: string };
-}
-
-export default async function NewsPage({ params }: NewsPageProps) {
-  const newsId = Number(params.id);
+export default async function NewsPage(props: any) {
+  const newsId = Number(props?.params?.id);
   const news = await fetchNewsById(newsId);
-
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>{news.big_title}</h1>
-      
+
       <div className={styles.dateRow}>
         <img src="/calendarIcon.svg" className={styles.calendarIco} alt="Calendar" />
         <span className={styles.dateLabel}>Дата публикации:</span>
