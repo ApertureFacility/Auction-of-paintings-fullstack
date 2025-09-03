@@ -9,6 +9,7 @@ interface InputProps {
   disabled?: boolean;
   type?: "text" | "password" | "email" | "tel";
   variant?: "default" | "blackBorder";
+  className?: string; 
 }
 
 const Input: React.FC<InputProps> = ({
@@ -19,9 +20,10 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   type = "text",
   variant = "default",
+  className = "",
 }) => {
   return (
-    <div className={styles.inputWrapper}>
+    <div className={`${styles.inputWrapper}`}> 
       {label && <label className={styles.inputLabel}>{label}</label>}
       <div
         className={`${styles.inputContainer} ${

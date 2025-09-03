@@ -3,7 +3,7 @@ import styles from "./InfoAccord.module.css";
 import Button from "../Button/Button";
 
 function AuctionInfoSection() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className={styles.accordion}>
