@@ -60,13 +60,15 @@ const Header = () => {
           />
           {isProfileMenuOpen && isAuthenticated && (
             <div className={styles.profileDropdown}>
+              <Link
+                href="/profile/personal">
               <button
                 className={styles.profileMenuButton}
                 onClick={() => setIsProfileMenuOpen(false)}
               >
                 <img src="/ProfileInfo.svg" alt="Данные" />
                 <span>Персональные данные</span>
-              </button>
+              </button></Link>
               <Link
                 href="/profile/favorites"
                 onClick={() => setIsProfileMenuOpen(false)}

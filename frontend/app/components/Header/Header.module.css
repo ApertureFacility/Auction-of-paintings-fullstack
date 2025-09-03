@@ -40,6 +40,7 @@
 
 .iconBasket {
   display: flex;
+  cursor: pointer;
 }
 
 .authButton {
@@ -97,6 +98,9 @@
     cursor: pointer;
   }
   @media (min-width: 1340px) {
+    .iconBurger{
+      display: none;
+    }
     .header {
       display: flex;
       flex-wrap: wrap;
