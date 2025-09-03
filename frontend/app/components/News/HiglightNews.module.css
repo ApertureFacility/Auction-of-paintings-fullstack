@@ -47,7 +47,6 @@
 @media (min-width: 1024px) {
   .newsWrapper__desktop {
     display: flex;
-    margin-left: 215px;
     padding: 5px;
   }
   .newsWrapper {
