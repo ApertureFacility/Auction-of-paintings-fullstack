@@ -22,10 +22,12 @@ const Header = () => {
 
   return (
     <header className={styles.header}>
-      <Link href="/" className={styles.logo}>AUCTION.COM</Link>
+      <Link href="/" className={styles.logo}>
+        AUCTION.COM
+      </Link>
 
       <nav className={styles.nav}>
-      <Link href="/news">Новости</Link>
+        <Link href="/news">Новости</Link>
         <a href="#">about</a>
         <a href="#">discover</a>
         <a href="#">services</a>
@@ -40,7 +42,7 @@ const Header = () => {
               onClick={() => openModal("login")}
             >
               <img src="/login.svg" alt="auth" />
-              <span>Авторизация</span>
+              <span>Вход</span>
             </button>
           ) : (
             <button className={styles.authButton} onClick={logout}>
@@ -52,49 +54,57 @@ const Header = () => {
         </div>
 
         <div className={styles.profileWrapper}>
-          <img
-            src="/userSquare.svg"
-            alt="Профиль"
-            className={styles.iconBasket}
-            onClick={toggleProfileMenu}
-          />
-          {isProfileMenuOpen && isAuthenticated && (
-            <div className={styles.profileDropdown}>
-              <Link
-                href="/profile/personal">
-              <button
-                className={styles.profileMenuButton}
-                onClick={() => setIsProfileMenuOpen(false)}
-              >
-                <img src="/ProfileInfo.svg" alt="Данные" />
-                <span>Персональные данные</span>
-              </button></Link>
-              <Link
-                href="/profile/favorites"
-                onClick={() => setIsProfileMenuOpen(false)}
-              >
-                <button className={styles.profileMenuButton}>
-                  <img src="/star.svg" alt="Избранное" />
-                  <span>Избранные лоты</span>
-                </button>
-              </Link>
-              <button
-                className={styles.profileMenuButton}
-                onClick={() => setIsProfileMenuOpen(false)}
-              >
-                <img src="/shop.svg" alt="Покупки" />
-                <span>История покупок</span>
-              </button>
-            </div>
-          )}
+  {isAuthenticated && (
+    <><div className={styles.authButton} onClick={toggleProfileMenu}>
+    <img
+      src="/userSquare.svg"
+      alt="Профиль"
+      className={styles.iconBasket}
+    />
+    <span>Профиль</span>
+  </div>
+      {isProfileMenuOpen && (
+        <div className={styles.profileDropdown}>
+          <Link href="/profile/personal">
+            <button
+              className={styles.profileMenuButton}
+              onClick={() => setIsProfileMenuOpen(false)}
+            >
+              <img src="/ProfileInfo.svg" alt="Данные" />
+              <span>Персональные данные</span>
+            </button>
+          </Link>
 
-          <img
-            src="/Burger.svg"
-            alt="Меню"
-            className={styles.iconBurger}
-            onClick={toggleMenu}
-          />
+          <Link href="/profile/favorites">
+            <button
+              className={styles.profileMenuButton}
+              onClick={() => setIsProfileMenuOpen(false)}
+            >
+              <img src="/star.svg" alt="Избранное" />
+              <span>Избранные лоты</span>
+            </button>
+          </Link>
+
+          <button
+            className={styles.profileMenuButton}
+            onClick={() => setIsProfileMenuOpen(false)}
+          >
+            <img src="/shop.svg" alt="Покупки" />
+            <span>История покупок</span>
+          </button>
         </div>
+      )}
+    </>
+  )}
+
+  <img
+    src="/Burger.svg"
+    alt="Меню"
+    className={styles.iconBurger}
+    onClick={toggleMenu}
+  />
+</div>
+
       </div>
 
       <SearchInput

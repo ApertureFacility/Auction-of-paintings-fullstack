@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import styles from "./InfoAccord.module.css";
 import Button from "../Button/Button";
+import { useModalStore } from "@/app/lib/modalStore";
 
 function AuctionInfoSection() {
   const [isOpen, setIsOpen] = useState(true);
+  const openModal = useModalStore((state) => state.open);
 
   return (
     <div className={styles.accordion}>
@@ -46,8 +48,9 @@ function AuctionInfoSection() {
             Зарегистрируйтесь сейчас, чтобы делать предварительные ставки или
             делать ставки в реальном времени в нашем цифровом зале продаж.
           </p>
-
-          <Button variant="secondary">Зарегестрироваться</Button>
+         
+          <Button variant="secondary" onClick={() => openModal("login")}
+            >Зарегестрироваться</Button>
 
           <div className={styles.filter__contacts_wrapper}>
             <h5 className={styles.filter__heading}>Контакты со специалистом</h5>
