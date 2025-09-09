@@ -11,9 +11,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     SECRET: str
     CORS_ORIGINS: List[str] = [
-    "http://localhost:3000",
-    "http://192.168.100.5:3000"
-]
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://host.docker.internal:3000",
+    ]
 
     @property
     def DATABASE_URL(self) -> str:
@@ -23,6 +24,7 @@ class Settings(BaseSettings):
         )
 
     model_config = ConfigDict(env_file=".env")
+
 
 @lru_cache()
 def get_settings():

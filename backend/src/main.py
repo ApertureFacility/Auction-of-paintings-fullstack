@@ -5,6 +5,7 @@ from .auth.router import router as auth_router
 from .lots.routers import router as lots_router
 from .favorites.router import router as favorites_router
 from .auction.websocket import websocket_router
+from .email.router import router as email_router 
 from .news import routes as news_routes
 from .core.config import settings
 
@@ -17,10 +18,11 @@ app  = FastAPI(
 # --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,  
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,              
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # --- Подключение роутеров ---
@@ -30,6 +32,7 @@ app.include_router(lots_router)
 app.include_router(favorites_router)
 app.include_router(websocket_router)
 app.include_router(news_routes.router)
+app.include_router(email_router)
 
 @app.get("/")
 def read_root():
