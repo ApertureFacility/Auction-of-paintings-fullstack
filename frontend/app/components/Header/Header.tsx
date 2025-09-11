@@ -28,7 +28,7 @@ const Header = () => {
 
       <nav className={styles.nav}>
         <Link href="/news">Новости</Link>
-        <a href="#">about</a>
+        <Link href="/about">О нас</Link>
         <a href="#">discover</a>
         <a href="#">services</a>
         <a href="#">Как купить или продать</a>
