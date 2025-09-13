@@ -59,3 +59,5 @@ venv/
 .env
 frontend/package-lock.json
 
+fastapi_utf8.sql
+fastapi_utf8_clean.dump
