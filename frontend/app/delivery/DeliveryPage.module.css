@@ -1,0 +1,117 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+  }
+  
+  .header {
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 2rem;
+  }
+  
+  .header h1 {
+    font-size: 2.5rem;
+    color: #000000;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section {
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-left: 4px solid #333333;
+  }
+  
+  .section h2 {
+    font-size: 1.8rem;
+    color: #000000;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #cccccc;
+  }
+  
+  .section h3 {
+    font-size: 1.4rem;
+    color: #333333;
+    margin: 1.2rem 0 0.8rem;
+  }
+  
+  .section p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: #444444;
+  }
+  
+  .steps {
+    background-color: #f0f0f0;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  .steps ol {
+    padding-left: 1.5rem;
+  }
+  
+  .steps li {
+    margin-bottom: 0.5rem;
+    color: #444444;
+  }
+  
+  .paymentMethod, .deliveryMethod {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  .paymentMethod:last-child, .deliveryMethod:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .paymentMethod ul, .deliveryMethod ul {
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .paymentMethod li, .deliveryMethod li {
+    margin-bottom: 0.3rem;
+    color: #444444;
+  }
+  
+  .notes {
+    padding: 1.5rem;
+    background-color: #f5f5f5;
+    border-left: 4px solid #666666;
+  }
+  
+  .notes h2 {
+    font-size: 1.5rem;
+    color: #000000;
+    margin-bottom: 1rem;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem 2rem;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+    }
+    
+    .section {
+      padding: 1rem;
+    }
+    
+    .section h2 {
+      font-size: 1.5rem;
+    }
+    
+    .steps {
+      padding: 1rem;
+    }
+  }
