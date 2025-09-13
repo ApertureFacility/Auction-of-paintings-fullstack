@@ -29,9 +29,9 @@ const Header = () => {
       <nav className={styles.nav}>
         <Link href="/news">Новости</Link>
         <Link href="/about">О нас</Link>
-        <a href="#">discover</a>
-        <a href="#">services</a>
-        <a href="#">Как купить или продать</a>
+        <Link href="/contacts">Контакты</Link>
+        <Link href="/products">Наши услуги</Link>
+        <Link href="/delivery">Как купить или продать</Link>
       </nav>
 
       <div className={styles.right}>

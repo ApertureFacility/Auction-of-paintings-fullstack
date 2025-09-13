@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './Footer.module.css';
 
 const Footer = () => {
@@ -15,7 +16,7 @@ const Footer = () => {
       <div className={styles.column_corporate}>
         <h3 className={styles.title}>Corporate</h3>
         <ul className={styles.list}>
-          <li>Press</li>
+        <Link href="/news"><li>Press</li></Link>
           <li>Privacy policy</li>
           <li>Corporate governance</li>
           <li>Careers</li>

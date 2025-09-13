@@ -41,6 +41,7 @@ function FilterComponent() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Для поиска по аукциону введите номер лота или название"
+        variant="blackBorder"
       />
       <FilterAccord />
       <AuctionInfoSection />
