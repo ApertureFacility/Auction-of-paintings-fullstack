@@ -1,7 +1,7 @@
 // lib/modalStore.ts
 import { create } from 'zustand'
 
-type ModalType = 'login' | 'forgot-password' | 'registration' | 'image-zoom' | null
+type ModalType = 'login' | 'forgot-password' | 'registration' | 'image-zoom' | 'congratsBig' | null
 
 interface ModalStore {
   openModal: ModalType

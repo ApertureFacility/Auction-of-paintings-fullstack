@@ -1,19 +1,14 @@
-'use client'
+"use client"
 
-import Input from "../../Inputs/Inputs"
 import Button from "../../Button/Button"
 import styles from "./CongtatsBig.module.css"
-import { useModalStore } from "../../../lib/modalStore" 
 
-export default function CongratsBigModal({
-  isOpen,
-  onClose,
-}: {
+interface CongratsBigModalProps {
   isOpen: boolean
   onClose: () => void
-}) {
-  const openModal = useModalStore((state) => state.open) 
+}
 
+export default function CongratsBigModal({ isOpen, onClose }: CongratsBigModalProps) {
   if (!isOpen) return null
 
   return (
@@ -28,15 +23,15 @@ export default function CongratsBigModal({
             onClick={onClose}
           />
         </div>
-       <p>Вы выйграли лот</p>
-       <p>13123123132</p>
-       <img
-            src="/CongratsBigPic.png"
-            alt="CongratsPic"
-            className={styles.GratsIcon}
-          />
-          <p>Ваш выйгрыш уже в корзине</p>
-          <Button variant="primary">Открыть корзину</Button>
+        <p>Вы выиграли лот</p>
+        <p>13123123132</p>
+        <img
+          src="/CongratsBigPic.png"
+          alt="CongratsPic"
+          className={styles.GratsIcon}
+        />
+        <p>Ваш выигрыш уже в корзине</p>
+        <Button variant="primary">Открыть корзину</Button>
       </div>
     </div>
   )
