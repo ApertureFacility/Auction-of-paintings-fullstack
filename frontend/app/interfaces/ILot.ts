@@ -26,6 +26,8 @@ export interface LotResponse {
   
 
 export interface LotSingleDetailedCard  {
+  end_time: string | number | Date;
+  is_forced_started: boolean;
   id: number;
   title: string;
   description?: string;
