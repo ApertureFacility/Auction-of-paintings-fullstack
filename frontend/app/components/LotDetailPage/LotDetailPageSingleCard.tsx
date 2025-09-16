@@ -30,14 +30,18 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [usersCount, setUsersCount] = useState(0);
+  const [auctionEnded, setAuctionEnded] = useState(false);
+  const [winnerId, setWinnerId] = useState<number | null>(null);
 
   const [lastBidTime, setLastBidTime] = useState<number | null>(null);
   const [timerPercent, setTimerPercent] = useState(0);
   const timerRef = useRef<number | null>(null);
 
   const minNextBid = Math.ceil(currentPrice * (1 + BID_STEP_PERCENT));
+  const canBid = React.useMemo(() => {
+    return !auctionEnded;
+  }, [auctionEnded]);
 
-  // Загружаем текущего пользователя
   useEffect(() => {
     async function loadUser() {
       try {
@@ -50,37 +54,27 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     loadUser();
   }, []);
 
-
   useEffect(() => {
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsHost = window.location.host; 
-    const ws = new WebSocket(`${wsProtocol}://${wsHost.replace("3000", "8000")}/ws/lots/${lot.id}`);
-    
+    const wsHost = window.location.host;
+    const ws = new WebSocket(
+      `${wsProtocol}://${wsHost.replace("3000", "8000")}/ws/lots/${lot.id}`
+    );
+
     ws.onopen = () => {
       console.log("WebSocket соединение установлено");
       setSocket(ws);
       setIsConnected(true);
-
-
-      ws.send(
-        JSON.stringify({
-          type: "GET_HISTORY",
-          lot_id: lot.id,
-        })
-      );
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-    
       if (Array.isArray(data)) {
         setBids(data);
-        if (data.length > 0) {
-          setCurrentPrice(data[0].amount);
-        }
+        if (data.length > 0) setCurrentPrice(data[0].amount);
         return;
       }
-    
+
       if (data.type === "NEW_BID" && data.bid) {
         const newBid: Bid = {
           id: data.bid.id,
@@ -92,12 +86,46 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         setCurrentPrice(data.bid.amount);
         return;
       }
-    
       if (data.type === "USERS_COUNT") {
         setUsersCount(data.count);
+        return;
+      }
+
+      if (data.type === "AUCTION_ENDED") {
+        setAuctionEnded(true);
+        setWinnerId(data.winner_id || null);
+
+        if (data.winner_id === userId) {
+          useModalStore.getState().open("congratsBig");
+        }
+        return;
+      }
+      if (data.type === "LOT_STATUS") {
+        setAuctionEnded(!data.is_active);
+        setCurrentPrice(data.current_price);
+        return;
+      }
+
+      if (data.type === "AUCTION_NOT_STARTED") {
+        alert(`Аукцион ещё не начался. Старт: ${formatDate(data.start_time)}`);
+        return;
+      }
+
+      if (data.type === "AUCTION_ENDED") {
+        setAuctionEnded(true);
+        setWinnerId(data.winner_id || null);
+
+        if (data.winner_id === userId) {
+          useModalStore.getState().open("congratsBig");
+        }
+        return;
+      }
+
+      if (data.type === "ERROR") {
+        alert(data.message);
+        return;
       }
     };
-    
 
     ws.onerror = (error) => {
       console.error("WebSocket ошибка:", error);
@@ -113,34 +141,24 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
       if (
         ws.readyState === WebSocket.OPEN ||
         ws.readyState === WebSocket.CONNECTING
-      ) {
+      )
         ws.close();
-      }
     };
-  }, [lot.id]);
-
+  }, [lot.id, userId]);
 
   useEffect(() => {
-    if (bids.length > 0) {
-      setLastBidTime(Date.now());
-    }
+    if (bids.length > 0) setLastBidTime(Date.now());
   }, [bids]);
 
   useEffect(() => {
     if (!lastBidTime) {
       setTimerPercent(0);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
 
     setTimerPercent(100);
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
+    if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = window.setInterval(() => {
       const elapsed = Date.now() - lastBidTime;
@@ -155,37 +173,54 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     }, 50);
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [lastBidTime]);
 
   useEffect(() => {
     setBidAmount(minNextBid.toString());
   }, [currentPrice]);
-  const tableRef = useRef<HTMLDivElement | null>(null);
 
+  const tableRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.scrollTop = 0;
-    }
+    if (tableRef.current) tableRef.current.scrollTop = 0;
   }, [bids]);
 
-  const onTimerComplete = () => {
-    alert("Аукцион завершён! Лот достается последнему победителю.");
+  const onTimerComplete = async () => {
+    if (!lot.id) return;
+
+    try {
+      const wsMessage = {
+        type: "CLOSE_AUCTION",
+        lot_id: lot.id,
+      };
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(wsMessage));
+      }
+
+      await fetch(`http://localhost:8000/lots/${lot.id}/finish`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      setAuctionEnded(true);
+    } catch (error) {
+      console.error("Не удалось завершить аукцион:", error);
+    }
   };
 
   const handleZoomClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (lot.image_url) {
-      open("image-zoom", { imageUrl: lot.image_url });
-    }
+    if (lot.image_url) open("image-zoom", { imageUrl: lot.image_url });
   };
 
   const handleBidSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!canBid) {
+      alert("Аукцион ещё не начался или завершён!");
+      return;
+    }
 
     if (!isConnected || !socket) {
       alert("Соединение с сервером не установлено");
@@ -210,21 +245,20 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
 
     socket.send(
       JSON.stringify({
+        type: "NEW_BID",
         user_id: userId,
-        amount: amount,
+        amount,
       })
     );
 
     setBidAmount("");
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("ru-RU").format(price);
-  };
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("ru-RU").format(price);
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Не указано";
-
     try {
       return new Date(dateString).toLocaleString("ru-RU", {
         day: "numeric",
@@ -245,10 +279,8 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
           <p className={styles.price}>
             Стартовая цена: {formatPrice(lot.start_price)} ₽
           </p>
-
           <p className={styles.time}>Стартует: {formatDate(lot.start_time)}</p>
           <p>Количество участников: {usersCount}</p>
-
         </section>
 
         <div className={styles.timerWrapper}>
@@ -266,16 +298,24 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
             onChange={(e) => setBidAmount(e.target.value)}
             placeholder={`Минимальная ставка ${formatPrice(minNextBid)} ₽`}
           />
-
-          <Button variant="primary" disabled={!isConnected}>
-            {isConnected ? "Сделать ставку" : "Подключение..."}
+          <Button variant="primary" disabled={!isConnected || !canBid}>
+            {auctionEnded
+              ? "Аукцион завершён"
+              : canBid
+              ? "Сделать ставку"
+              : "Ожидание начала"}
           </Button>
-          {!isConnected && (
-            <p className={styles.connectionWarning}>
-              Нет соединения с сервером ставок
-            </p>
-          )}
         </form>
+
+        {auctionEnded && (
+          <div className={styles.auctionResult}>
+            {winnerId
+              ? winnerId === userId
+                ? "Поздравляем! Вы победили 🎉"
+                : `Аукцион завершён. Победитель — пользователь ${winnerId}`
+              : "Аукцион завершён без победителя"}
+          </div>
+        )}
 
         <section className={styles.bidsSection}>
           <h3>История ставок</h3>
