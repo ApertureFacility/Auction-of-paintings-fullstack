@@ -28,21 +28,30 @@ class Lot(Base):
     current_price: Mapped[float] = mapped_column(Float, nullable=True)
     start_price: Mapped[float] = mapped_column(Float, nullable=False)
     image_url: Mapped[str] = mapped_column(String, nullable=True)
+
     start_time: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), 
-        nullable=True, 
+        DateTime(timezone=False),
+        nullable=True,
         default=lambda: datetime.utcnow() + timedelta(hours=1)
     )
+    end_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False),
+        nullable=True,
+        default=lambda: datetime.utcnow() + timedelta(days=1)
+    )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), 
-        nullable=False, 
+        DateTime(timezone=False),
+        nullable=False,
         default=datetime.utcnow
     )
-    
+
+    is_forced_started: Mapped[bool] = mapped_column(default=False)  
+
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     lot_materials: Mapped[str] = mapped_column(String, nullable=True)
     auction_name: Mapped[str] = mapped_column(String, nullable=True)
     author: Mapped[str] = mapped_column(String, nullable=True)
+
 
     favorited_by: Mapped[list["User"]] = relationship(
         secondary=user_favorite_lots,
