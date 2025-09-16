@@ -1,6 +1,12 @@
+import asyncio
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import String, cast, func, or_, select
+
+from src.auction.manager import manager
+
+
 from .schemas import LotCreate, LotListResponse, LotRead
 from src.models import Lot
 from src.core.db import get_db
@@ -96,4 +102,37 @@ async def read_lot(lot_id: int, db: AsyncSession = Depends(get_db)):
     if not lot:
         raise HTTPException(status_code=404, detail="Lot not found")
     
+    return lot
+
+@router.post("/{lot_id}/start", response_model=LotRead)
+async def force_start_lot(lot_id: int, db: AsyncSession = Depends(get_db)):
+    lot = await db.get(Lot, lot_id)
+    if not lot:
+        raise HTTPException(status_code=404, detail="Lot not found")
+
+    lot.is_forced_started = True
+    if not lot.start_time or lot.start_time > datetime.utcnow():
+        lot.start_time = datetime.utcnow()
+
+    await db.commit()
+    await db.refresh(lot)
+
+    asyncio.create_task(manager.broadcast_status(lot.id, True))  # <--- вот здесь
+
+    return lot
+
+@router.post("/{lot_id}/finish", response_model=LotRead)
+async def force_finish_lot(lot_id: int, db: AsyncSession = Depends(get_db)):
+    lot = await db.get(Lot, lot_id)
+    if not lot:
+        raise HTTPException(status_code=404, detail="Lot not found")
+
+    lot.is_forced_started = False
+    lot.end_time = datetime.utcnow()
+
+    await db.commit()
+    await db.refresh(lot)
+
+    asyncio.create_task(manager.broadcast_status(lot.id, False))  # <--- уведомляем фронт
+
     return lot
