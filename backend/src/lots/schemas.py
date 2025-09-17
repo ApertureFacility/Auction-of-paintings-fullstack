@@ -45,3 +45,13 @@ class LotRead(LotBase):
 class LotListResponse(BaseModel):
     items: List[LotRead]
     total: int
+
+class BidRead(BaseModel):
+    id: int
+    lot_id: int
+    user_id: int
+    amount: float
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

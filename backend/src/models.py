@@ -19,6 +19,20 @@ user_favorite_lots = Table(
     Column("lot_id", ForeignKey("lots.id", ondelete="CASCADE"), primary_key=True),
 )
 
+
+class Bid(Base):
+    __tablename__ = "bids"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    lot_id: Mapped[int] = mapped_column(ForeignKey("lots.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    lot: Mapped["Lot"] = relationship(back_populates="bids")
+    user: Mapped["User"] = relationship(back_populates="bids")
+
+
 class Lot(Base):
     __tablename__ = "lots"
 
@@ -52,7 +66,6 @@ class Lot(Base):
     auction_name: Mapped[str] = mapped_column(String, nullable=True)
     author: Mapped[str] = mapped_column(String, nullable=True)
 
-
     favorited_by: Mapped[list["User"]] = relationship(
         secondary=user_favorite_lots,
         back_populates="favorite_lots",
@@ -71,6 +84,13 @@ class Lot(Base):
         foreign_keys=[owner_id],
         lazy="selectin"
     )
+
+    bids: Mapped[list["Bid"]] = relationship(
+        back_populates="lot",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    ) 
+
 
 class Purchase(Base):
     __tablename__ = "purchases"

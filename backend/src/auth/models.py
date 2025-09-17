@@ -2,8 +2,9 @@ from __future__ import annotations
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer
-from src.models import Lot, Purchase
+from src.models import Bid, Lot, Purchase
 from src.core.db import Base
+
 
 class User(Base, SQLAlchemyBaseUserTable[int]):
     __tablename__ = "users"
@@ -25,4 +26,9 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     lots: Mapped[list["Lot"]] = relationship(
         back_populates="owner",
         foreign_keys="Lot.owner_id"
+    )
+
+    bids: Mapped[list["Bid"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
     )
