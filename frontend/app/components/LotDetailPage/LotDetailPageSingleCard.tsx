@@ -16,15 +16,13 @@ interface Bid {
   created_at: string;
 }
 
-const BID_TIME_LIMIT = 10000;
 const BID_STEP_PERCENT = 0.02;
 
 export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const { open } = useModalStore();
+
   const [bids, setBids] = useState<Bid[]>([]);
-  const [currentPrice, setCurrentPrice] = useState(
-    lot.current_price || lot.start_price
-  );
+  const [currentPrice, setCurrentPrice] = useState(lot.current_price || lot.start_price);
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [bidAmount, setBidAmount] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -32,13 +30,13 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const [usersCount, setUsersCount] = useState(0);
   const [auctionEnded, setAuctionEnded] = useState(false);
   const [winnerId, setWinnerId] = useState<number | null>(null);
+  const [isActive, setIsActive] = useState(lot.is_forced_started || false);
 
   const [lastBidTime, setLastBidTime] = useState<number | null>(null);
   const [timerPercent, setTimerPercent] = useState(0);
   const timerRef = useRef<number | null>(null);
 
   const minNextBid = Math.ceil(currentPrice * (1 + BID_STEP_PERCENT));
-  const canBid = React.useMemo(() => !auctionEnded, [auctionEnded]);
 
   // Загружаем пользователя
   useEffect(() => {
@@ -56,51 +54,41 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   // Подключение к WebSocket
   useEffect(() => {
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsHost = window.location.host;
-    const ws = new WebSocket(
-      `${wsProtocol}://${wsHost.replace("3000", "8000")}/ws/lots/${lot.id}`
-    );
+    const wsHost = "localhost:8000";
+    const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws/lots/${lot.id}`);
 
     ws.onopen = () => {
-      console.log("WebSocket соединение установлено");
       setSocket(ws);
       setIsConnected(true);
+    };
+
+    ws.onclose = () => {
+      setSocket(null);
+      setIsConnected(false);
+    };
+
+    ws.onerror = (err) => {
+      console.error("[WS Error]", err);
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (Array.isArray(data)) {
-        setBids(data);
-        if (data.length > 0) setCurrentPrice(data[0].amount);
-        return;
-      }
-
       switch (data.type) {
-        case "NEW_BID":
-          if (data.bid) {
-            const newBid: Bid = {
-              id: data.bid.id,
-              amount: data.bid.amount,
-              bidder_name: data.bid.bidder_name,
-              created_at: data.bid.created_at,
-            };
-            setBids((prev) => [newBid, ...prev]);
-            setCurrentPrice(data.bid.amount);
-          }
+        case "LOT_STATUS":
+          setIsActive(data.is_active);
+          setCurrentPrice(data.current_price);
           break;
 
         case "BID_HISTORY":
-          if (Array.isArray(data.bids)) {
-            const mappedBids: Bid[] = data.bids.map((b: any) => ({
-              id: b.id,
-              amount: b.amount,
-              bidder_name: b.bidder_name,
-              created_at: b.created_at,
-            }));
-            setBids(mappedBids);
-            if (mappedBids.length > 0) setCurrentPrice(mappedBids[0].amount);
-          }
+          setBids(data.bids);
+          if (data.bids.length > 0) setCurrentPrice(data.bids[0].amount);
+          break;
+
+        case "NEW_BID":
+          setBids(prev => [data.bid, ...prev]);
+          setCurrentPrice(data.bid.amount);
+          setLastBidTime(Date.now());
           break;
 
         case "USERS_COUNT":
@@ -110,157 +98,82 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         case "AUCTION_ENDED":
           setAuctionEnded(true);
           setWinnerId(data.winner_id || null);
+          setIsActive(false);
           setLastBidTime(null);
           setTimerPercent(0);
           if (timerRef.current) clearInterval(timerRef.current);
 
           if (data.winner_id === userId) {
-            useModalStore.getState().open("congratsBig"); // только серверная победа
+            open("congratsBig");
           }
-          break;
-
-        case "LOT_STATUS":
-          setAuctionEnded(!data.is_active);
-          setCurrentPrice(data.current_price);
-
-          if (!data.is_active) {
-            setLastBidTime(null);
-            setTimerPercent(0);
-            if (timerRef.current) clearInterval(timerRef.current);
-          }
-          break;
-
-        case "AUCTION_NOT_STARTED":
-          alert(
-            `Аукцион ещё не начался. Старт: ${formatDate(data.start_time)}`
-          );
           break;
 
         case "ERROR":
-          alert(data.message);
+          console.error("[WS ERROR]", data.message);
           break;
 
         default:
           console.warn("Unknown message type:", data.type);
-          break;
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket ошибка:", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket соединение закрыто");
-      setIsConnected(false);
-      setSocket(null);
-    };
-
+    setSocket(ws);
     return () => {
-      if (
-        ws.readyState === WebSocket.OPEN ||
-        ws.readyState === WebSocket.CONNECTING
-      )
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
         ws.close();
+      }
     };
-  }, [lot.id, userId]);
+  }, [lot.id, userId, open]);
 
-  // Таймер на новые ставки
+  // Таймер для последней ставки с отключением is_forced_started
   useEffect(() => {
-    if (auctionEnded) {
-      setTimerPercent(0);
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-
-    if (bids.length === 0) return;
-
-    // Новая ставка считается свежей, если была создана в последние 2 сек
-    const lastBid = bids[0];
-    const bidTime = new Date(lastBid.created_at).getTime();
-    const now = Date.now();
-    if (now - bidTime < 2000) {
-      setLastBidTime(now);
-    }
-  }, [bids, auctionEnded]);
-
-  useEffect(() => {
-    if (!lastBidTime || auctionEnded) {
-      setTimerPercent(0);
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
+    if (!lastBidTime || auctionEnded) return;
 
     setTimerPercent(100);
     if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = window.setInterval(() => {
       const elapsed = Date.now() - lastBidTime;
-      const percent = Math.max(0, 100 - (elapsed / BID_TIME_LIMIT) * 100);
+      const percent = Math.max(0, 100 - (elapsed / 10000) * 100);
       setTimerPercent(percent);
 
-      if (elapsed >= BID_TIME_LIMIT) {
+      if (elapsed >= 10000) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
-        onTimerComplete();
+
+        // Если лот был форсирован, закрываем его автоматически
+        if (isActive && lot.is_forced_started) {
+          setIsActive(false);
+          // Сообщаем серверу о закрытии
+          socket?.send(JSON.stringify({ type: "CLOSE_AUCTION" }));
+        }
       }
     }, 50);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [lastBidTime, auctionEnded]);
+  }, [lastBidTime, auctionEnded, socket, isActive, lot.is_forced_started]);
 
   useEffect(() => {
     setBidAmount(minNextBid.toString());
   }, [currentPrice]);
 
-  const tableRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (tableRef.current) tableRef.current.scrollTop = 0;
-  }, [bids]);
-
-  const onTimerComplete = async () => {
-    if (!lot.id || auctionEnded) return;
-
-    try {
-      const wsMessage = { type: "CLOSE_AUCTION", lot_id: lot.id };
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(wsMessage));
-      }
-
-      await fetch(`http://localhost:8000/lots/${lot.id}/finish`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      setAuctionEnded(true);
-    } catch (error) {
-      console.error("Не удалось завершить аукцион:", error);
-    }
-  };
-
-  const handleZoomClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (lot.image_url) open("image-zoom", { imageUrl: lot.image_url });
-  };
-
   const handleBidSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (auctionEnded) {
-      // <-- новая проверка
-      alert("Аукцион уже завершён!");
+    if (!isActive) {
+      alert("Аукцион ещё не активен!");
       return;
     }
 
-    if (!canBid) {
-      alert("Аукцион ещё не начался!");
+    if (auctionEnded) {
+      alert("Аукцион завершён!");
       return;
     }
 
     if (!isConnected || !socket) {
-      alert("Соединение с сервером не установлено");
+      alert("Нет соединения с сервером");
       return;
     }
 
@@ -270,31 +183,23 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     }
 
     const amount = parseFloat(bidAmount);
-    if (isNaN(amount)) {
-      alert("Введите корректную сумму");
-      return;
-    }
-
-    if (amount < minNextBid) {
+    if (isNaN(amount) || amount < minNextBid) {
       alert(`Минимальная ставка: ${formatPrice(minNextBid)} ₽`);
       return;
     }
 
-    socket.send(
-      JSON.stringify({
-        type: "NEW_BID",
-        user_id: userId,
-        amount,
-      })
-    );
+    socket.send(JSON.stringify({
+      type: "NEW_BID",
+      user_id: userId,
+      amount
+    }));
 
     setBidAmount("");
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("ru-RU").format(price);
+  const formatPrice = (price: number) => new Intl.NumberFormat("ru-RU").format(price);
 
-  const formatDate = (dateString: string | undefined) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return "Не указано";
     try {
       return new Date(dateString).toLocaleString("ru-RU", {
@@ -309,23 +214,22 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     }
   };
 
+  const handleZoomClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (lot.image_url) open("image-zoom", { imageUrl: lot.image_url });
+  };
+
   return (
     <article className={styles.card}>
       <div className={styles.leftColumn}>
         <section className={styles.priceSection}>
-          <p className={styles.price}>
-            Стартовая цена: {formatPrice(lot.start_price)} ₽
-          </p>
+          <p className={styles.price}>Стартовая цена: {formatPrice(lot.start_price)} ₽</p>
           <p className={styles.time}>Стартует: {formatDate(lot.start_time)}</p>
           <p>Количество участников: {usersCount}</p>
         </section>
 
         <div className={styles.timerWrapper}>
-          <TimerCircle
-            timerPercent={timerPercent}
-            currentPrice={currentPrice}
-            formatPrice={formatPrice}
-          />
+          <TimerCircle timerPercent={timerPercent} currentPrice={currentPrice} formatPrice={formatPrice} />
         </div>
 
         <form onSubmit={handleBidSubmit} className={styles.bidForm}>
@@ -335,15 +239,8 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
             onChange={(e) => setBidAmount(e.target.value)}
             placeholder={`Минимальная ставка ${formatPrice(minNextBid)} ₽`}
           />
-          <Button
-            variant="primary"
-            disabled={!isConnected || !canBid || auctionEnded}
-          >
-            {auctionEnded
-              ? "Аукцион завершён"
-              : canBid
-              ? "Сделать ставку"
-              : "Ожидание начала"}
+          <Button variant="primary" disabled={!isActive || auctionEnded || !isConnected}>
+            {auctionEnded ? "Аукцион завершён" : isActive ? "Сделать ставку" : "Ожидание начала"}
           </Button>
         </form>
 
@@ -360,7 +257,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         <section className={styles.bidsSection}>
           <h3>История ставок</h3>
           {bids.length > 0 ? (
-            <div className={styles.tableWrapper} ref={tableRef}>
+            <div className={styles.tableWrapper}>
               <table className={styles.bidsTable}>
                 <thead>
                   <tr>
@@ -372,36 +269,24 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
                 </thead>
                 <tbody>
                   {bids.slice(0, 15).map((bid, index) => (
-                    <tr
-                      key={bid.id}
-                      className={index === 0 ? styles.newBidRow : ""}
-                    >
+                    <tr key={bid.id} className={index === 0 ? styles.newBidRow : ""}>
                       <td>{index + 1}</td>
                       <td>{bid.bidder_name}</td>
-                      <td className={styles.bidAmount}>
-                        {formatPrice(bid.amount)} ₽
-                      </td>
+                      <td className={styles.bidAmount}>{formatPrice(bid.amount)} ₽</td>
                       <td>{formatDate(bid.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p>Ставок пока нет</p>
-          )}
+          ) : <p>Ставок пока нет</p>}
         </section>
       </div>
 
       <div className={styles.rightColumn}>
         {lot.image_url && (
           <figure className={styles.imageContainer} onClick={handleZoomClick}>
-            <img
-              src={lot.image_url}
-              alt={lot.title}
-              className={styles.image}
-              loading="lazy"
-            />
+            <img src={lot.image_url} alt={lot.title} className={styles.image} loading="lazy" />
           </figure>
         )}
 
@@ -411,12 +296,8 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
         </div>
 
         <div className={styles.details}>
-          <p className={styles.detailItem}>
-            <strong>Материалы:</strong> {lot.lot_materials}
-          </p>
-          <p className={styles.detailItem}>
-            <strong>Аукцион:</strong> {lot.auction_name}
-          </p>
+          <p className={styles.detailItem}><strong>Материалы:</strong> {lot.lot_materials}</p>
+          <p className={styles.detailItem}><strong>Аукцион:</strong> {lot.auction_name}</p>
         </div>
 
         <section className={styles.description}>
