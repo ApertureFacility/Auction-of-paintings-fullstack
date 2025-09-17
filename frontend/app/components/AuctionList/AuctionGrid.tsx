@@ -4,7 +4,6 @@ import Pagination from "../Pagination/Pagination";
 import { fetchLots, fetchLotsSearch } from "../../apiRequests/lotsRequests";
 import { LotSmallCard } from "@/app/interfaces/ILot";
 import AuctionLotCardSmall from "./AuctionLotCard";
-import Loader from "../Loader/Loader";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const LOTS_PER_PAGE = 6;
@@ -51,27 +50,19 @@ const AuctionGrid: React.FC = () => {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  if (loading) {
-    return (
-      <div className={styles.wrapper}>
-        <Loader />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className={styles.wrapper}>Ошибка: {error}</div>;
-  }
-
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.heading}>Актуальные лоты</h1>
+
       <div className={styles.grid}>
-        {lots.map((lot) => (
-          <AuctionLotCardSmall key={lot.id} lot={lot} />
-        ))}
+        {loading
+          ? [...Array(LOTS_PER_PAGE)].map((_, idx) => (
+              <div key={idx} className={styles.skeletonCard}></div>
+            ))
+          : lots.map((lot) => <AuctionLotCardSmall key={lot.id} lot={lot} />)}
       </div>
-      {totalPages > 1 && (
+
+      {!loading && totalPages > 1 && (
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
