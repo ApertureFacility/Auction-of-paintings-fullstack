@@ -38,10 +38,9 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const timerRef = useRef<number | null>(null);
 
   const minNextBid = Math.ceil(currentPrice * (1 + BID_STEP_PERCENT));
-  const canBid = React.useMemo(() => {
-    return !auctionEnded;
-  }, [auctionEnded]);
+  const canBid = React.useMemo(() => !auctionEnded, [auctionEnded]);
 
+  // Загружаем пользователя
   useEffect(() => {
     async function loadUser() {
       try {
@@ -54,6 +53,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     loadUser();
   }, []);
 
+  // Подключение к WebSocket
   useEffect(() => {
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
     const wsHost = window.location.host;
@@ -69,61 +69,80 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
       if (Array.isArray(data)) {
         setBids(data);
         if (data.length > 0) setCurrentPrice(data[0].amount);
         return;
       }
 
-      if (data.type === "NEW_BID" && data.bid) {
-        const newBid: Bid = {
-          id: data.bid.id,
-          amount: data.bid.amount,
-          bidder_name: data.bid.bidder_name,
-          created_at: data.bid.created_at,
-        };
-        setBids((prev) => [newBid, ...prev]);
-        setCurrentPrice(data.bid.amount);
-        return;
-      }
-      if (data.type === "USERS_COUNT") {
-        setUsersCount(data.count);
-        return;
-      }
+      switch (data.type) {
+        case "NEW_BID":
+          if (data.bid) {
+            const newBid: Bid = {
+              id: data.bid.id,
+              amount: data.bid.amount,
+              bidder_name: data.bid.bidder_name,
+              created_at: data.bid.created_at,
+            };
+            setBids((prev) => [newBid, ...prev]);
+            setCurrentPrice(data.bid.amount);
+          }
+          break;
 
-      if (data.type === "AUCTION_ENDED") {
-        setAuctionEnded(true);
-        setWinnerId(data.winner_id || null);
+        case "BID_HISTORY":
+          if (Array.isArray(data.bids)) {
+            const mappedBids: Bid[] = data.bids.map((b: any) => ({
+              id: b.id,
+              amount: b.amount,
+              bidder_name: b.bidder_name,
+              created_at: b.created_at,
+            }));
+            setBids(mappedBids);
+            if (mappedBids.length > 0) setCurrentPrice(mappedBids[0].amount);
+          }
+          break;
 
-        if (data.winner_id === userId) {
-          useModalStore.getState().open("congratsBig");
-        }
-        return;
-      }
-      if (data.type === "LOT_STATUS") {
-        setAuctionEnded(!data.is_active);
-        setCurrentPrice(data.current_price);
-        return;
-      }
+        case "USERS_COUNT":
+          setUsersCount(data.count);
+          break;
 
-      if (data.type === "AUCTION_NOT_STARTED") {
-        alert(`Аукцион ещё не начался. Старт: ${formatDate(data.start_time)}`);
-        return;
-      }
+        case "AUCTION_ENDED":
+          setAuctionEnded(true);
+          setWinnerId(data.winner_id || null);
+          setLastBidTime(null);
+          setTimerPercent(0);
+          if (timerRef.current) clearInterval(timerRef.current);
 
-      if (data.type === "AUCTION_ENDED") {
-        setAuctionEnded(true);
-        setWinnerId(data.winner_id || null);
+          if (data.winner_id === userId) {
+            useModalStore.getState().open("congratsBig"); // только серверная победа
+          }
+          break;
 
-        if (data.winner_id === userId) {
-          useModalStore.getState().open("congratsBig");
-        }
-        return;
-      }
+        case "LOT_STATUS":
+          setAuctionEnded(!data.is_active);
+          setCurrentPrice(data.current_price);
 
-      if (data.type === "ERROR") {
-        alert(data.message);
-        return;
+          if (!data.is_active) {
+            setLastBidTime(null);
+            setTimerPercent(0);
+            if (timerRef.current) clearInterval(timerRef.current);
+          }
+          break;
+
+        case "AUCTION_NOT_STARTED":
+          alert(
+            `Аукцион ещё не начался. Старт: ${formatDate(data.start_time)}`
+          );
+          break;
+
+        case "ERROR":
+          alert(data.message);
+          break;
+
+        default:
+          console.warn("Unknown message type:", data.type);
+          break;
       }
     };
 
@@ -146,12 +165,27 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     };
   }, [lot.id, userId]);
 
+  // Таймер на новые ставки
   useEffect(() => {
-    if (bids.length > 0) setLastBidTime(Date.now());
-  }, [bids]);
+    if (auctionEnded) {
+      setTimerPercent(0);
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    if (bids.length === 0) return;
+
+    // Новая ставка считается свежей, если была создана в последние 2 сек
+    const lastBid = bids[0];
+    const bidTime = new Date(lastBid.created_at).getTime();
+    const now = Date.now();
+    if (now - bidTime < 2000) {
+      setLastBidTime(now);
+    }
+  }, [bids, auctionEnded]);
 
   useEffect(() => {
-    if (!lastBidTime) {
+    if (!lastBidTime || auctionEnded) {
       setTimerPercent(0);
       if (timerRef.current) clearInterval(timerRef.current);
       return;
@@ -175,7 +209,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [lastBidTime]);
+  }, [lastBidTime, auctionEnded]);
 
   useEffect(() => {
     setBidAmount(minNextBid.toString());
@@ -187,13 +221,10 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   }, [bids]);
 
   const onTimerComplete = async () => {
-    if (!lot.id) return;
+    if (!lot.id || auctionEnded) return;
 
     try {
-      const wsMessage = {
-        type: "CLOSE_AUCTION",
-        lot_id: lot.id,
-      };
+      const wsMessage = { type: "CLOSE_AUCTION", lot_id: lot.id };
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify(wsMessage));
       }
@@ -217,8 +248,14 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   const handleBidSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (auctionEnded) {
+      // <-- новая проверка
+      alert("Аукцион уже завершён!");
+      return;
+    }
+
     if (!canBid) {
-      alert("Аукцион ещё не начался или завершён!");
+      alert("Аукцион ещё не начался!");
       return;
     }
 
@@ -298,7 +335,10 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
             onChange={(e) => setBidAmount(e.target.value)}
             placeholder={`Минимальная ставка ${formatPrice(minNextBid)} ₽`}
           />
-          <Button variant="primary" disabled={!isConnected || !canBid}>
+          <Button
+            variant="primary"
+            disabled={!isConnected || !canBid || auctionEnded}
+          >
             {auctionEnded
               ? "Аукцион завершён"
               : canBid
