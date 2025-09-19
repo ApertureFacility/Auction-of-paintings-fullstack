@@ -1,147 +1,110 @@
-import { RegisterPayload } from "../interfaces/IUser"
+import { RegisterPayload } from "../interfaces/IUser";
+import { getBaseUrl } from "../lib/api";
 
 
-  
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
+const BASE = getBaseUrl();
 
-  export async function requestVerification(email: string) {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/verify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-      credentials: "include",
-    });
-  
-    if (!res.ok) {
-      throw new Error("Не удалось отправить письмо для верификации");
-    }
-  
-    return res.json();
+export async function requestVerification(email: string) {
+  const res = await fetch(`${BASE}/users/verify`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Не удалось отправить письмо для верификации");
+  return res.json();
+}
+
+export async function registerUser(payload: RegisterPayload) {
+  const res = await fetch(`${BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Ошибка регистрации");
   }
-  
+  return res.json();
+}
 
-  export async function registerUser(payload: RegisterPayload) {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-  
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || "Ошибка регистрации")
-    }
-  
-    return response.json()
-  }
+export async function loginUser({ email, password }: { email: string; password: string }) {
+  const formData = new URLSearchParams();
+  formData.append("grant_type", "password");
+  formData.append("username", email);
+  formData.append("password", password);
 
-
-
-  export async function loginUser({
-    email,
-    password,
-  }: {
-    email: string
-    password: string
-  }) {
-    const formData = new URLSearchParams()
-    formData.append("grant_type", "password")
-    formData.append("username", email)
-    formData.append("password", password)
-  
-    const response = await fetch(`${API_URL}/auth/jwt/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    })
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || "Ошибка авторизации")
-    }
-    const data = await response.json()
-    localStorage.setItem("access_token", data.access_token)
-    return data
-  }
-
-  export async function addLotToFavorites(lotId: number) {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      throw new Error("Сначала войдите в аккаунт");
-    }
-  
-    const res = await fetch(`${API_URL}/favorites/add/${lotId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.detail || "Не удалось добавить в избранное");
-    }
-  
-    return true;
-  }
-
-
-
-  export async function fetchCurrentUser() {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-  
-    if (!token) {
-      return null;
-    }
-  
-    try {
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
-  
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          return null;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return null;
-    }
-  }
-  
-
-export const removeLotFromFavorites = async (lotId: string) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem("access_token") : null;
-
-  if (!token) {
-    throw new Error("Сначала войдите в аккаунт");
-  }
-
-  const response = await fetch(`${API_URL}/favorites/remove/${lotId}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
+  const res = await fetch(`${BASE}/auth/jwt/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: formData.toString(),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Не удалось удалить лот из избранного");
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Ошибка авторизации");
   }
 
-  return await response.json();
-};
+  const data = await res.json();
+  localStorage.setItem("access_token", data.access_token);
+  return data;
+}
 
+export async function addLotToFavorites(lotId: number) {
+  const token = localStorage.getItem("access_token");
+  if (!token) throw new Error("Сначала войдите в аккаунт");
+
+  const res = await fetch(`${BASE}/favorites/add/${lotId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Не удалось добавить в избранное");
+  }
+  return true;
+}
+
+export async function fetchCurrentUser() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  if (!token) return null;
+
+  try {
+    const res = await fetch(`${BASE}/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        localStorage.removeItem("access_token");
+        return null;
+      }
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    return null;
+  }
+}
+
+export const removeLotFromFavorites = async (lotId: string) => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  if (!token) throw new Error("Сначала войдите в аккаунт");
+
+  const res = await fetch(`${BASE}/favorites/remove/${lotId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Не удалось удалить лот из избранного");
+  }
+  return res.json();
+};
