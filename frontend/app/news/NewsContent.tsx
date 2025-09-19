@@ -62,7 +62,6 @@ const NewsComponent = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Новости</h1>
 
       <div className={styles.newsList}>
         {loading ? (
