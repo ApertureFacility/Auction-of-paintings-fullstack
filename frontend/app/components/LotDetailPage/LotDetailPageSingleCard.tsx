@@ -51,12 +51,13 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     loadUser();
   }, []);
 
-  // Подключение к WebSocket
   useEffect(() => {
-    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsHost = "localhost:8000";
+    const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const wsProtocol = baseApiUrl.startsWith("https") ? "wss" : "ws";
+    const wsHost = baseApiUrl.replace(/^https?:\/\//, "");
     const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws/lots/${lot.id}`);
-
+    
+    
     ws.onopen = () => {
       setSocket(ws);
       setIsConnected(true);

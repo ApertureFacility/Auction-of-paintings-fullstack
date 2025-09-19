@@ -1,15 +1,25 @@
 import styles from "./SoloNewsPage.module.css";
 import { fetchNewsById } from "@/app/apiRequests/newsRequests";
 
-export default async function NewsPage(props: any) {
-  const newsId = Number(props?.params?.id);
+interface NewsPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function NewsPage({ params }: NewsPageProps) {
+  const { id } = await params;  
+  const newsId = Number(id);
+
   const news = await fetchNewsById(newsId);
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>{news.big_title}</h1>
-
       <div className={styles.dateRow}>
-        <img src="/calendarIcon.svg" className={styles.calendarIco} alt="Calendar" />
+        <img
+          src="/calendarIcon.svg"
+          className={styles.calendarIco}
+          alt="Calendar"
+        />
         <span className={styles.dateLabel}>Дата публикации:</span>
         <span className={styles.dateValue}>
           {new Date(news.published_at).toLocaleDateString()}
@@ -43,8 +53,12 @@ export default async function NewsPage(props: any) {
               />
             </div>
           )}
-          {news.small_title && <h2 className={styles.subTitle}>{news.small_title}</h2>}
-          {news.small_text && <p className={styles.smallText}>{news.small_text}</p>}
+          {news.small_title && (
+            <h2 className={styles.subTitle}>{news.small_title}</h2>
+          )}
+          {news.small_text && (
+            <p className={styles.smallText}>{news.small_text}</p>
+          )}
         </section>
       )}
     </div>
