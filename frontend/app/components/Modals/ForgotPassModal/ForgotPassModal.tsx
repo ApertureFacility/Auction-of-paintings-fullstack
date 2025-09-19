@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Input from "../../Inputs/Inputs";
 import Button from "../../Button/Button";
 import styles from "./ForgotModal.module.css";
@@ -15,6 +15,16 @@ export default function ForgotPassModal({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
@@ -23,7 +33,6 @@ export default function ForgotPassModal({
       setError("Пожалуйста, введите email");
       return;
     }
-    
     if (!emailRegex.test(email)) {
       setError("Пожалуйста, введите корректный email");
       return;
@@ -32,40 +41,40 @@ export default function ForgotPassModal({
     setLoading(true);
     setMessage("");
     setError("");
-    
+
     try {
       const encodedEmail = encodeURIComponent(email);
-      const url = `http://localhost:8000/email/forgot-password?email=${encodedEmail}`;
-      
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-      
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/email/forgot-password?email=${encodedEmail}`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
       const data = await res.json();
-      
+
       if (res.ok) {
         setMessage("Письмо для восстановления пароля отправлено!");
         setEmail("");
       } else {
-
         switch (res.status) {
           case 422:
             if (Array.isArray(data.detail)) {
-              const errorMessages = data.detail.map((err: any) => {
-                if (err.msg) return err.msg;
-                if (err.message) return err.message;
-                return "Ошибка валидации";
-              });
+              const errorMessages = data.detail.map((err: any) =>
+                err.msg || err.message || "Ошибка валидации"
+              );
               setError(errorMessages.join(", "));
             } else if (data.detail) {
-              setError(typeof data.detail === 'string' 
-                ? data.detail 
-                : "Ошибка валидации данных");
+              setError(
+                typeof data.detail === "string"
+                  ? data.detail
+                  : "Ошибка валидации данных"
+              );
             } else {
               setError("Неверный формат данных");
             }
@@ -90,10 +99,15 @@ export default function ForgotPassModal({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
     if (error) setError("");
+    if (message) setMessage(""); 
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
   };
 
   return (
-    <div className={styles.backdrop}>
+    <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal}>
         <div className={styles.topBlock}>
           <h2 className={styles.title}>Забыли пароль</h2>
