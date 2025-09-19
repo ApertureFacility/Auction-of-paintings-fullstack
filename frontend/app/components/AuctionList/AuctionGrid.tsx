@@ -55,14 +55,30 @@ const AuctionGrid: React.FC = () => {
       <h1 className={styles.heading}>Актуальные лоты</h1>
 
       <div className={styles.grid}>
-        {loading
-          ? [...Array(LOTS_PER_PAGE)].map((_, idx) => (
-              <div key={idx} className={styles.skeletonCard}></div>
-            ))
-          : lots.map((lot) => <AuctionLotCardSmall key={lot.id} lot={lot} />)}
+        {loading ? (
+          [...Array(LOTS_PER_PAGE)].map((_, idx) => (
+            <div key={idx} className={styles.skeletonCard}></div>
+          ))
+        ) : lots.length > 0 ? (
+          lots.map((lot) => <AuctionLotCardSmall key={lot.id} lot={lot} />)
+        ) : (
+          <div className={styles.emptyState}>
+            <img
+              src="/file.svg"
+              alt="Ничего не найдено"
+              className={styles.emptyImage}
+            />
+
+            <p className={styles.emptyText}>
+              {searchQuery
+                ? `По запросу "${searchQuery}" ничего не найдено`
+                : "Лоты отсутствуют"}
+            </p>
+          </div>
+        )}
       </div>
 
-      {!loading && totalPages > 1 && (
+      {!loading && totalPages > 1 && lots.length > 0 && (
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}

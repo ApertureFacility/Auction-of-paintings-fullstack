@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import styles from './AboutPage.module.css';
+import styles from './aboutPage.module.css';
 
 function AboutUsPage() {
   return (
