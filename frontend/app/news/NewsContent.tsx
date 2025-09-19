@@ -5,11 +5,12 @@ import { INews } from "../interfaces/INews";
 import { fetchAllNews } from "../apiRequests/newsRequests";
 import styles from "./NewsComponent.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
+import NewsSkeleton from "./NewsSkeleton";
+
 
 const NewsComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
 
   const initialPage = Number(searchParams.get("page")) || 1;
   const [page, setPage] = useState(initialPage);
@@ -59,56 +60,58 @@ const NewsComponent = () => {
     router.push(`/news/${id}`);
   };
 
-  if (loading) {
-    return <div className={styles.center}>Загрузка новостей...</div>;
-  }
-
-  if (error) {
-    return <div className={`${styles.center} ${styles.error}`}>Ошибка: {error}</div>;
-  }
-
-  if (news.length === 0) {
-    return <div className={styles.center}>Новостей не найдено</div>;
-  }
-
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Новости</h1>
 
       <div className={styles.newsList}>
-        {news.map(item => (
-          <article
-            key={item.id}
-            className={styles.newsItem}
-            onClick={() => handleClick(item.id)}
-            style={{ cursor: "pointer" }}
-          >
-            <div className={styles.newsRow}>
-              {item.image1_url && (
-                <img
-                  src={item.image1_url}
-                  alt={item.big_title}
-                  className={styles.imageLeft}
-                />
-              )}
+        {loading ? (
+          [...Array(limit)].map((_, idx) => <NewsSkeleton key={idx} />)
+        ) : error ? (
+          <div className={`${styles.center} ${styles.error}`}>
+            Ошибка: {error}
+          </div>
+        ) : news.length === 0 ? (
+          <div className={styles.center}>Новостей не найдено</div>
+        ) : (
+          news.map(item => (
+            <article
+              key={item.id}
+              className={styles.newsItem}
+              onClick={() => handleClick(item.id)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className={styles.newsRow}>
+                {item.image1_url && (
+                  <img
+                    src={item.image1_url}
+                    alt={item.big_title}
+                    className={styles.imageLeft}
+                  />
+                )}
 
-              <div className={styles.textBlock}>
-                <h2 className={styles.bigTitle}>{item.big_title}</h2>
-                <p className={styles.bigText}>{item.big_text}</p>
+                <div className={styles.textBlock}>
+                  <h2 className={styles.bigTitle}>{item.big_title}</h2>
+                  <p className={styles.bigText}>{item.big_text}</p>
 
-                <div className={styles.dateRow}>
-                  <img src="/calendarIcon.svg" className={styles.calendarIco} alt="Calendar" />
-                  <span className={styles.dateLabel}>Дата публикации:</span>
-                  <span className={styles.dateValue}>
-                    {new Date(item.published_at).toLocaleDateString()}
-                  </span>
+                  <div className={styles.dateRow}>
+                    <img
+                      src="/calendarIcon.svg"
+                      className={styles.calendarIco}
+                      alt="Calendar"
+                    />
+                    <span className={styles.dateLabel}>Дата публикации:</span>
+                    <span className={styles.dateValue}>
+                      {new Date(item.published_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <hr className={styles.separator} />
-          </article>
-        ))}
+              <hr className={styles.separator} />
+            </article>
+          ))
+        )}
       </div>
 
       <div className={styles.pagination}>
