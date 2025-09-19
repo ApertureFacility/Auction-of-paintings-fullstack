@@ -4,7 +4,21 @@ import { RegisterPayload } from "../interfaces/IUser"
   
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-
+  export async function requestVerification(email: string) {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+      credentials: "include",
+    });
+  
+    if (!res.ok) {
+      throw new Error("Не удалось отправить письмо для верификации");
+    }
+  
+    return res.json();
+  }
+  
 
   export async function registerUser(payload: RegisterPayload) {
     const response = await fetch(`${API_URL}/auth/register`, {
@@ -76,37 +90,38 @@ import { RegisterPayload } from "../interfaces/IUser"
 
 
 
-export async function fetchCurrentUser() {
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem("access_token") : null;
+  export async function fetchCurrentUser() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   
-  if (!token) {
-    throw new Error("Authentication token not found");
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/users/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      credentials: 'include' 
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem("access_token");
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (!token) {
+      return null;
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-    throw error;
+  
+    try {
+      const response = await fetch(`${API_URL}/users/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+  
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("access_token");
+          return null;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
   }
-}
+  
 
 export const removeLotFromFavorites = async (lotId: string) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem("access_token") : null;
