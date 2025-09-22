@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException,status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -16,12 +16,31 @@ async def get_current_user_with_favorites(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(current_active_user)
 ):
+    """
+    Получить данные текущего пользователя вместе с избранными лотами.
+
+    Args:
+        db (AsyncSession): Асинхронная сессия базы данных.
+        user (User): Текущий аутентифицированный пользователь.
+
+    Returns:
+        UserRead: Pydantic-схема с данными пользователя и его избранными лотами.
+
+    Raises:
+        HTTPException: Если пользователь не найден в базе данных.
+    """
     result = await db.execute(
         select(User)
         .options(selectinload(User.favorite_lots))
         .where(User.id == user.id)
     )
-    user_with_favorites = result.scalar_one()
+    user_with_favorites = result.scalar_one_or_none()
+
+    if not user_with_favorites:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
 
     return UserRead(
         id=user_with_favorites.id,
