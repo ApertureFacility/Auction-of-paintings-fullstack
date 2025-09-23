@@ -3,6 +3,7 @@ from typing import Optional, Union
 from datetime import datetime
 
 class NewsBase(BaseModel):
+    """Схема новости на 2 текста ,2 картинки"""
     big_title: str
     big_text: str
     image1_url: Optional[Union[str, None]] = None 

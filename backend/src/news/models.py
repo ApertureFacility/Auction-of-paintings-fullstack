@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime
 from src.core.db import Base 
 
 class News(Base):
+    """Модель новости на 2 текста ,2 картинки"""
     __tablename__ = "news"
 
     id = Column(Integer, primary_key=True, index=True)
