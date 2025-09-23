@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 def parse_auction_name(soup):
+    """Парсит название выставки из блока информации о предмете."""
     groups = soup.select("div.subject_info_block__group")
     for group in groups:
         label = group.select_one("div.subject_info_block__group_label")
@@ -14,8 +15,10 @@ def parse_auction_name(soup):
     return None
 
 def parse_description(soup):
+    """Парсит краткое описание лота (до 5 абзацев текста)."""
     main_content = soup.select_one("div.main_content")
     if not main_content:
+        # Если нет основного блока — берём fallback
         description_div = soup.select_one("div.editable_block.with_editor_panel")
         if description_div:
             paragraphs = description_div.find_all(["p", "div"], recursive=False)
@@ -24,7 +27,6 @@ def parse_description(soup):
         return None
     
     texts = []
-
     editable_blocks = main_content.select("div.editable_block.with_editor_panel")
     for block in editable_blocks:
         text = block.get_text(" ", strip=True)
@@ -35,39 +37,32 @@ def parse_description(soup):
 
     return "\n\n".join(texts) if texts else None
 
-
 def parse_author(soup):
+    """Пытается извлечь имя автора из разных мест страницы."""
     author_element = soup.select_one("div.subject_info_block__authors a.subject_info_block__author")
-    
-
     if not author_element:
         author_element = soup.select_one("div.subject_info_block__author.paragraphS")
-    
-
     if not author_element:
         author_element = soup.select_one("div.subject_info_block__authors div.subject_info_block__author")
-    
-
     if not author_element:
+        # Если автора нет, пробуем вытащить его из заголовка
         title_block = soup.select_one("h1.subject_info_block__title")
         if title_block and " - " in title_block.text:
             possible_author = title_block.text.split(" - ")[0].strip()
             if len(possible_author) < 100:  
                 return clean_author_name(possible_author) or "Не указан"
-    
-
     return clean_author_name(author_element.text.strip()) if author_element else "Не указан"
 
 def clean_author_name(author):
+    """Очищает имя автора от лишних пробелов и скобок."""
     if not author:
         return None
-
     author = ' '.join(author.split())
-
     author = re.sub(r'\(.*?\)', '', author).strip()
     return author if author else None
 
 def parse_lot_detail(url, base_url="https://ar.culture.ru"):
+    """Парсит детали одного лота по URL."""
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -76,7 +71,6 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
         )
     }
     
-   
     full_url = url if url.startswith("http") else f"{base_url}{url}"
     
     try:
@@ -89,9 +83,11 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
 
         soup = BeautifulSoup(resp.text, "html.parser")
 
+        # Заголовок
         title = soup.select_one("h1.subject_info_block__title")
         title = title.text.strip() if title else None
 
+        # Материалы/техника
         materials = None
         for group in soup.select("div.subject_info_block__group"):
             label = group.select_one("div.subject_info_block__group_label")
@@ -102,9 +98,9 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
                 break
 
         description = parse_description(soup)
-        start_price = random.randint(0, 1000)
+        start_price = random.randint(0, 1000)  # Генерируем стартовую цену случайно
 
-
+        # Картинка
         image = soup.select_one("img#point_test_image")
         if image:
             if image.has_attr("data-src"):
@@ -127,7 +123,7 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
             "image_url": image_url,
             "auction_name": auction_name,
             "lot_author": author,
-             "start_price": start_price
+            "start_price": start_price
         }
     
     except Exception as e:
@@ -135,6 +131,7 @@ def parse_lot_detail(url, base_url="https://ar.culture.ru"):
         return None
 
 def process_urls(url_list, output_file="results.json"):
+    """Обрабатывает список URL и сохраняет результат в JSON."""
     import json
     results = []
     
@@ -146,7 +143,6 @@ def process_urls(url_list, output_file="results.json"):
         else:
             print(f"Skipped: {url}")
     
-
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     
@@ -154,7 +150,7 @@ def process_urls(url_list, output_file="results.json"):
     return results
 
 if __name__ == "__main__":
-
+    # Пример: список тестовых URL для парсинга
     urls = [
         "/ru/subject/allegoriya-brennosti",
         "/ru/subject/vid-v-krymu-pri-zakate-solnca",
@@ -162,6 +158,4 @@ if __name__ == "__main__":
         "/ru/subject/sadko",
         "/ru/subject/yudif-i-olofern"
     ]
-    
-
     process_urls(urls)
