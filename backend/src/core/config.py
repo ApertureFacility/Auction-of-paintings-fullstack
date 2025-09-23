@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://host.docker.internal:3000",
+        "http://192.168.100.5:3000"
     ]
 
     @property
