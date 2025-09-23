@@ -1,8 +1,12 @@
 import os
+from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr
 from typing import List
 
+
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = BASE_DIR / "templates"
 
 mail_config = ConnectionConfig(
     MAIL_USERNAME="",
@@ -18,6 +22,15 @@ mail_config = ConnectionConfig(
 
 fm = FastMail(mail_config)
 
+def load_template(name: str, **kwargs) -> str:
+    """Загружает HTML-шаблон и подставляет значения переменных"""
+    template_path = TEMPLATE_DIR / name
+    if not template_path.exists():
+        raise FileNotFoundError(f"Шаблон {name} не найден")
+
+    content = template_path.read_text(encoding="utf-8")
+    return content.format(**kwargs)
+
 async def send_email(
     to: List[EmailStr],
     subject: str,
@@ -31,49 +44,27 @@ async def send_email(
         body=body,
         subtype=subtype,
     )
-    
     await fm.send_message(message)
+
 
 async def send_welcome_email(email: EmailStr, username: str):
     """Приветственное письмо после регистрации"""
     subject = f"Добро пожаловать в Auction App, {username}!"
-    body = f"""
-    <h1>Добро пожаловать!</h1>
-    <p>Привет, {username}!</p>
-    <p>Спасибо за регистрацию в нашем аукционном приложении.</p>
-    <p>Ваш email: {email}</p>
-    <br>
-    <p>С уважением,<br>Команда Auction App</p>
-    """
-    
+    body = load_template("welcome.html", username=username, email=email)
     await send_email([email], subject, body)
 
-async def send_bid_notification_email(email: EmailStr, lot_name: str, amount: float):
-    """Уведомление о новой ставке"""
-    subject = f"Новая ставка на лот '{lot_name}'!"
-    body = f"""
-    <h1>Новая ставка!</h1>
-    <p>На лот <strong>{lot_name}</strong> сделана новая ставка: ${amount}</p>
-    <p>Не упустите свой шанс!</p>
-    """
-    
+
+async def send_confirmation_email(email: EmailStr, username: str, token: str):
+    """Письмо для подтверждения аккаунта"""
+    confirm_link = f"http://localhost:3000/confirm-account?token={token}"
+    subject = f"Подтверждение аккаунта для {username}"
+    body = load_template("confirm_account.html", username=username, confirm_link=confirm_link)
     await send_email([email], subject, body)
 
-async def send_auction_ended_email(email: EmailStr, lot_name: str, winning: bool = False):
-    """Уведомление о завершении аукциона"""
-    if winning:
-        subject = f"Поздравляем! Вы выиграли лот '{lot_name}'"
-        body = f"""
-        <h1>Поздравляем с победой!</h1>
-        <p>Вы выиграли лот <strong>{lot_name}</strong></p>
-        <p>Свяжитесь с продавцом для оформления покупки.</p>
-        """
-    else:
-        subject = f"Аукцион по лоту '{lot_name}' завершен"
-        body = f"""
-        <h1>Аукцион завершен</h1>
-        <p>Аукцион по лоту <strong>{lot_name}</strong> завершен.</p>
-        <p>К сожалению, ваша ставка не выиграла.</p>
-        """
-    
+
+async def send_reset_password_email(email: EmailStr, token: str):
+    """Письмо для восстановления пароля"""
+    reset_link = f"http://localhost:3000/reset-password?token={token}"
+    subject = "Восстановление пароля"
+    body = load_template("reset_password.html", reset_link=reset_link)
     await send_email([email], subject, body)
