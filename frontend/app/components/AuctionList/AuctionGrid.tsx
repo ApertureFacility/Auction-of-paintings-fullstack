@@ -19,6 +19,10 @@ const AuctionGrid: React.FC = () => {
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const searchQuery = searchParams.get("search") || "";
+  
+  useEffect(() => {
+    console.log("CLIENT: NEXT_PUBLIC_API_URL =", process.env.NEXT_PUBLIC_API_URL);
+  }, []);
 
   useEffect(() => {
     const loadLots = async () => {
