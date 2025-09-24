@@ -7,7 +7,7 @@ from .manager import get_user_manager
 from src.core.config import settings
 
 
-# Транспорт отвечает за способ передачи токена (в нашем случае — Bearer через заголовки HTTP).
+#  Bearer через заголовки HTTP
 # tokenUrl указывает эндпоинт для логина, который будет использоваться в Swagger UI.
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
@@ -31,13 +31,14 @@ auth_backend = AuthenticationBackend(
 
 
 # FastAPIUsers — основная точка интеграции.
-# Параметры [User, uuid.UUID]:
+# Параметры [User, int]:
 #   User — это модель пользователя (SQLAlchemy).
-#   uuid.UUID — тип первичного ключа пользователя.
-fastapi_users = FastAPIUsers[User, uuid.UUID](
-    get_user_manager,      # Функция, которая управляет пользователями (создание, обновление и т.д.)
-    [auth_backend],        # Список доступных backend-методов аутентификации (можно добавить несколько).
+#   int — тип первичного ключа пользователя.
+fastapi_users = FastAPIUsers[User, int](
+    get_user_manager,
+    [auth_backend],
 )
+
 
 
 # Депенденси для проверки текущего пользователя.

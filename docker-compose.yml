@@ -23,8 +23,8 @@ services:
     env_file:
       - ./frontend/.env.local
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000   # браузер будет ходить на localhost:8000
-      - SERVER_API_URL=http://backend:8000          # SSR внутри контейнера ходит на backend:8000
+    - NEXT_PUBLIC_API_URL=http://192.168.100.5:8000     
+    - SERVER_API_URL=http://backend:8000       
     ports:
       - "3000:3000"
     volumes:
