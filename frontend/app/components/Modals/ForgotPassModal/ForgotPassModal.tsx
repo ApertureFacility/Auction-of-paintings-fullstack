@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Input from "../../Inputs/Inputs";
 import Button from "../../Button/Button";
 import styles from "./ForgotModal.module.css";
+import { forgotPassword } from "@/app/apiRequests/userRequests";
+
 
 export default function ForgotPassModal({
   isOpen,
@@ -14,7 +16,6 @@ export default function ForgotPassModal({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,54 +44,24 @@ export default function ForgotPassModal({
     setError("");
 
     try {
-      const encodedEmail = encodeURIComponent(email);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/email/forgot-password?email=${encodedEmail}`,
-        {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({}),
-        }
-      );
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage("Письмо для восстановления пароля отправлено!");
-        setEmail("");
-      } else {
-        switch (res.status) {
-          case 422:
-            if (Array.isArray(data.detail)) {
-              const errorMessages = data.detail.map((err: any) =>
-                err.msg || err.message || "Ошибка валидации"
-              );
-              setError(errorMessages.join(", "));
-            } else if (data.detail) {
-              setError(
-                typeof data.detail === "string"
-                  ? data.detail
-                  : "Ошибка валидации данных"
-              );
-            } else {
-              setError("Неверный формат данных");
-            }
-            break;
-          case 404:
-            setError("Пользователь с таким email не найден");
-            break;
-          case 400:
-            setError(data.detail || "Неверный запрос");
-            break;
-          default:
-            setError(data.detail || "Ошибка при отправке письма");
-        }
+      const data = await forgotPassword(email);
+      setMessage("Письмо для восстановления пароля отправлено!");
+      console.log("Reset token:", data.token);
+      setEmail("");
+    } catch (err: any) {
+      switch (err.status) {
+        case 404:
+          setError("Пользователь с таким email не найден");
+          break;
+        case 422:
+          setError("Ошибка валидации данных");
+          break;
+        case 400:
+          setError(err.detail || "Неверный запрос");
+          break;
+        default:
+          setError(err.detail || "Ошибка при отправке письма");
       }
-    } catch (err) {
-      setError("Ошибка сети. Проверьте подключение к интернету");
     } finally {
       setLoading(false);
     }
@@ -99,7 +70,7 @@ export default function ForgotPassModal({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
     if (error) setError("");
-    if (message) setMessage(""); 
+    if (message) setMessage("");
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {

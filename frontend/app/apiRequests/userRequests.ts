@@ -108,3 +108,33 @@ export const removeLotFromFavorites = async (lotId: string) => {
   }
   return res.json();
 };
+export async function forgotPassword(email: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/forgot-password`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw { status: res.status, detail: data.detail || "Ошибка при запросе" };
+  }
+
+  return data;
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, new_password: newPassword }), 
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw { status: res.status, detail: data.detail };
+  return data;
+}
+
