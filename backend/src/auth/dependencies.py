@@ -1,43 +1,55 @@
-import uuid
 from fastapi_users import FastAPIUsers
-from fastapi_users.authentication import BearerTransport, AuthenticationBackend, JWTStrategy
-
 from .models import User
 from .manager import get_user_manager
+from fastapi_users.authentication import CookieTransport, AuthenticationBackend, JWTStrategy
 from src.core.config import settings
 
 
 #  Bearer через заголовки HTTP
 # tokenUrl указывает эндпоинт для логина, который будет использоваться в Swagger UI.
-bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+# Access-токен (короткоживущий)
+cookie_transport = CookieTransport(
+    cookie_name="auth",
+    cookie_max_age=3600,   # 1 час
+    cookie_secure=False,
+    cookie_httponly=True,
+)
 
+refresh_transport = CookieTransport(
+    cookie_name="refresh",
+    cookie_max_age=60 * 60 * 24 * 30,  # 30 дней
+    cookie_secure=False,
+    cookie_httponly=True,
+)
 
-def get_jwt_strategy() -> JWTStrategy:
-    """
-    Создаёт стратегию аутентификации с помощью JWT.
-
-    Returns:
-        JWTStrategy: Стратегия с секретным ключом и временем жизни токена.
-    """
+def get_access_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.SECRET, lifetime_seconds=3600)
 
+def get_refresh_strategy() -> JWTStrategy:
+    return JWTStrategy(secret=settings.SECRET, lifetime_seconds=60 * 60 * 24 * 30)
 
-# Backend аутентификации: FastAPI Users будет использовать JWT через Bearer-токен.
+
+# --- Authentication backends ---
 auth_backend = AuthenticationBackend(
-    name="jwt",
-    transport=bearer_transport,
-    get_strategy=get_jwt_strategy,
+    name="access",
+    transport=cookie_transport,
+    get_strategy=get_access_strategy,
 )
 
 
-# FastAPIUsers — основная точка интеграции.
-# Параметры [User, int]:
-#   User — это модель пользователя (SQLAlchemy).
-#   int — тип первичного ключа пользователя.
+refresh_backend = AuthenticationBackend(
+    name="refresh",
+    transport=refresh_transport,
+    get_strategy=get_refresh_strategy,
+)
+
+
+# --- FastAPI Users ---
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
-    [auth_backend],
+    [auth_backend, refresh_backend],  # подключаем оба бэкенда
 )
+
 
 
 

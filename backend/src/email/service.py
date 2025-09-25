@@ -62,9 +62,9 @@ async def send_confirmation_email(email: EmailStr, username: str, token: str):
     await send_email([email], subject, body)
 
 
-async def send_reset_password_email(email: EmailStr, token: str):
-    """Письмо для восстановления пароля"""
-    reset_link = f"http://localhost:3000/reset-password?token={token}"
+async def send_reset_password_email(email: EmailStr, reset_link: str):
     subject = "Восстановление пароля"
     body = load_template("reset_password.html", reset_link=reset_link)
-    await send_email([email], subject, body)
+    await fm.send_message(
+        MessageSchema(subject=subject, recipients=[email], body=body, subtype="html")
+    )
