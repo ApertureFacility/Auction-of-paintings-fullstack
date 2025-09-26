@@ -6,8 +6,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  verifyToken: () => Promise<void>;
-  login: (token: string) => Promise<boolean>;
+  verifyAuth: () => Promise<void>;
+  login: () => void;
   logout: () => Promise<void>;
 }
 
@@ -17,66 +17,43 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
 
 
-  verifyToken: async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      set({ isAuthenticated: false, isLoading: false });
-      return;
-    }
+  verifyAuth: async () => {
     try {
       const response = await fetch(`${API_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: "include", 
       });
 
       if (!response.ok) {
-        localStorage.removeItem("access_token");
         set({ isAuthenticated: false, isLoading: false });
         return;
       }
+
       set({ isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({
         isAuthenticated: false,
-        error: err instanceof Error ? err.message : "Ошибка проверки токена",
-        isLoading: false
+        error: err instanceof Error ? err.message : "Ошибка проверки авторизации",
+        isLoading: false,
       });
     }
   },
 
 
-  login: async (token: string) => {
-    try {
-      const response = await fetch(`${API_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) throw new Error("Неверный токен");
-
-      localStorage.setItem("access_token", token);
-      set({ isAuthenticated: true, error: null });
-      return true;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : "Ошибка входа"
-      });
-      return false;
-    }
+  login: () => {
+    set({ isAuthenticated: true, error: null });
   },
 
 
   logout: async () => {
-    const token = localStorage.getItem("access_token");
     try {
-      if (token) {
-        await fetch(`${API_URL}/auth/jwt/logout`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
+      await fetch(`${API_URL}/auth/cookie/logout`, {
+        method: "POST",
+        credentials: "include", 
+      });
     } catch (err) {
       console.error("Ошибка при выходе:", err);
     } finally {
-      localStorage.removeItem("access_token");
       set({ isAuthenticated: false, error: null });
     }
-  }
+  },
 }));

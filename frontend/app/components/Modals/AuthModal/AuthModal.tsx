@@ -5,9 +5,9 @@ import Button from "../../Button/Button";
 import styles from "./AuthModal.module.css";
 import { useModalStore } from "../../../lib/modalStore";
 import { useState, useEffect } from "react";
-import { loginUser } from "../../../apiRequests/userRequests";
+import { loginUserCookie } from "../../../apiRequests/userRequests";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthStore } from "../../../lib/authStore"; 
+import { useAuthStore } from "../../../lib/authStore";
 
 export default function AuthModal({
   isOpen,
@@ -26,6 +26,7 @@ export default function AuthModal({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     if (isOpen && !pathname.includes("/login")) {
@@ -46,14 +47,15 @@ export default function AuthModal({
 
     try {
       setLoading(true);
-      const { access_token } = await loginUser({ email, password });
 
-      const success = await login(access_token);
-      if (success) {
-        handleClose();
-      } else {
-        setError("Ошибка авторизации");
-      }
+      // делаем POST на /login-refresh, куки ставятся автоматически
+      await loginUserCookie({ email, password });
+
+      // меняем состояние в сторе
+      login();
+
+      // закрываем модалку
+      handleClose();
     } catch (err: any) {
       setError(err.message || "Ошибка авторизации");
     } finally {

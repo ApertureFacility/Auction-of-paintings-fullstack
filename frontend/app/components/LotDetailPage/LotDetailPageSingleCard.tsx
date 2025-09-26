@@ -6,7 +6,7 @@ import Button from "../Button/Button";
 import Input from "../Inputs/Inputs";
 import { useModalStore } from "../../lib/modalStore";
 import { LotSingleDetailedCard } from "@/app/interfaces/ILot";
-import { fetchCurrentUser } from "@/app/apiRequests/userRequests";
+import {  getCurrentUser } from "@/app/apiRequests/userRequests";
 import TimerCircle from "./TimeCircle";
 
 interface Bid {
@@ -42,7 +42,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
   useEffect(() => {
     async function loadUser() {
       try {
-        const user = await fetchCurrentUser();
+        const user = await getCurrentUser();
         setUserId(user.id);
       } catch (error) {
         console.error("Не удалось загрузить пользователя:", error);
@@ -126,7 +126,7 @@ export const LotCard: React.FC<{ lot: LotSingleDetailedCard }> = ({ lot }) => {
     };
   }, [lot.id, userId, open]);
 
-  // Таймер для последней ставки с отключением is_forced_started
+  
   useEffect(() => {
     if (!lastBidTime || auctionEnded) return;
 
