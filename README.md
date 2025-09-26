@@ -50,7 +50,7 @@
 ### 1. Подготовка
 
 * Установите [Docker](https://docs.docker.com/get-docker/) и [docker-compose](https://docs.docker.com/compose/).
-* Убедитесь, что **VPN отключен**, иначе Postgres может не подключиться.
+* Убедитесь, что **VPN отключен**, может привести к ошибкам.
 
 # Клонируем репозиторий
 git clone https://github.com/ApertureFacility/Auction-of-paintings-fullstack.git
@@ -67,7 +67,7 @@ cd Auction-of-paintings-fullstack
 
 
 ### 3. Запуск через Docker Compose
-
+> Используем команду в консоли,или в docker-compose.yml делаем run all services,ждем развертывания всех контейнеров .
 ```bash
 docker-compose up -d --build
 ```
@@ -78,22 +78,23 @@ docker-compose up -d --build
 * **Backend (FastAPI)** → [http://localhost:8000](http://localhost:8000)
 * **Frontend (Next.js)** → [http://localhost:3000](http://localhost:3000)
 * **Mailhog UI** → [http://localhost:8025](http://localhost:8025)
-* **PostgreSQL** → порт `5555` (локальные подключения)
+* **PostgreSQL** → порт `5555` (локальное подключение вашей бд)
 
 
 
 ### 5. Восстановление дампа БД (опционально в случае ошибки восстановления бэкапа бд докером)
 
-> Дамп содержит тестовый набор данных (пользователь, лоты).
+> Дамп содержит тестовый набор данных (пользователь, лоты).В compose уже есть сервис для развертки бэкапа,но в случае ошибок,проверяем наличие таблиц в БД,если нету,накатываем командами,обращайте внимание на путь к файлу в первой команде!
 
 ```bash
-docker cp "C:\Users\Admin\Desktop\Fullstack\db\init\backup.sql" postgres-db:/backup.sql
+docker cp "db\init\backup.sql" postgres-db:/backup.sql
 docker exec -it postgres-db psql -U postgres -d fastapi -f /backup.sql
 ```
 
 ---
-Имеется тестовый юзер :login:test@gmail.com password:13
-Уже записаны избранные лоты
+
+В БД Имеется тестовый юзер :login:test@gmail.com password:13
+Уже записаны избранные лоты,можно проверить их добавление,удаление,через иконку на главной,либо,их удаление в вкладке personal/favorites
 
 
 
@@ -225,4 +226,5 @@ npm run dev
 * Если у вас есть ошибки с бд,проверьте их наличие в базе данных Контейнера,если их нет используйте дамп БД — восстановите его после поднятия сервисов.
 
 ---
+
 
