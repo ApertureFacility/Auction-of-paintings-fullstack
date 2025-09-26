@@ -22,17 +22,13 @@ from src.auth.schemas import UserRead, UserCreate, UserUpdate
 router = APIRouter()
 
 
-# ===============================
-# 📌 Login schema — только email + password
-# ===============================
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
 
-# ===============================
-# 📌 Получение текущего пользователя с избранным
-# ===============================
+
 @router.get("/users/me", response_model=UserRead)
 async def get_current_user_with_favorites(
     db: AsyncSession = Depends(get_db),
@@ -57,9 +53,7 @@ async def get_current_user_with_favorites(
     )
 
 
-# ===============================
-# 📌 Стандартные роуты FastAPI Users
-# ===============================
+
 router.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth/cookie",
@@ -79,17 +73,13 @@ router.include_router(
 )
 
 
-# ===============================
-# 📌 Login-refresh (ставит access + refresh куки)
-#      — пользователь передаёт только email и password
-# ===============================
+
 @router.post("/auth/cookie/login-refresh", tags=["auth"])
 async def login_with_refresh(
     credentials: LoginRequest,
     response: Response,
     user_manager=Depends(get_user_manager),
 ):
-   
     auth_creds = SimpleNamespace(username=str(credentials.email), password=credentials.password)
 
     user = await user_manager.authenticate(auth_creds)
@@ -99,31 +89,45 @@ async def login_with_refresh(
     access_token = await get_access_strategy().write_token(user)
     refresh_token = await get_refresh_strategy().write_token(user)
 
-    # Ставим куки (в продакшене: secure=True, указать domain, sameSite по потребностям)
-    response.set_cookie("auth", access_token, httponly=True, max_age=3600, secure=False, samesite="lax")
+
     response.set_cookie(
-        "refresh", refresh_token, httponly=True, max_age=60 * 60 * 24 * 30, secure=False, samesite="lax"
+        "auth", access_token,
+        httponly=True,
+        max_age=3600,
+        secure=False,
+        samesite="lax",
+    )
+    response.set_cookie(
+        "refresh", refresh_token,
+        httponly=True,
+        max_age=60 * 60 * 24 * 30,
+        secure=False,
+        samesite="lax",
     )
 
     return {"message": "Logged in with refresh"}
 
 
-# ===============================
-# 📌 Refresh access токена через refresh cookie
-# ===============================
+
 @router.post("/auth/cookie/refresh", tags=["auth"])
 async def refresh_access_token(
     response: Response,
     user: User = Depends(fastapi_users.current_user(get_refresh_strategy, active=True)),
 ):
     new_access = await get_access_strategy().write_token(user)
-    response.set_cookie("auth", new_access, httponly=True, max_age=3600, secure=False, samesite="lax")
+
+    response.set_cookie(
+        "auth", new_access,
+        httponly=True,
+        max_age=3600,
+        secure=False,
+        samesite="lax",
+    )
+
     return {"message": "Access token refreshed"}
 
 
-# ===============================
-# 📌 Logout (удаление access и refresh cookies)
-# ===============================
+
 @router.post("/auth/cookie/logout", tags=["auth"])
 async def custom_logout(response: Response):
     response.delete_cookie("auth")
