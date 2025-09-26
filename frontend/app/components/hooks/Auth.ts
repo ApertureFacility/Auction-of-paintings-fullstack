@@ -1,4 +1,4 @@
-import { fetchCurrentUser } from "@/app/apiRequests/userRequests";
+import { getCurrentUser } from "@/app/apiRequests/userRequests";
 import { useEffect, useState } from "react";
 
 
@@ -12,7 +12,7 @@ export function useAuth() {
   useEffect(() => {
     const verifyToken = async () => {
       setIsLoading(true);
-      const currentUser = await fetchCurrentUser();
+      const currentUser = await getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
       } else {
@@ -26,7 +26,7 @@ export function useAuth() {
 
   const login = async (token: string) => {
     localStorage.setItem("access_token", token);
-    const currentUser = await fetchCurrentUser();
+    const currentUser = await getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
       setError(null);
