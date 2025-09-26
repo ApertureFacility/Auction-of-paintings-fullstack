@@ -1,4 +1,6 @@
+import asyncio
 from fastapi_users.db import SQLAlchemyUserDatabase
+from src.email.service import send_reset_password_email
 from src.core.db import async_session_maker
 from .models import User
 from src.core.config import settings
@@ -6,21 +8,13 @@ from fastapi_users import BaseUserManager, IntegerIDMixin
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    """
-    Менеджер пользователей для FastAPI Users.
-    Наследуется от
-    - IntegerIDMixin: работа с числовыми ID пользователей.
-    - BaseUserManager: базовая логика управления пользователями 
-      (регистрация, верификация, сброс пароля и т.п.).
-
-    Атрибуты:
-        user_db_model: модель SQLAlchemy для работы с таблицей пользователей.
-        reset_password_token_secret: секрет для токенов сброса пароля.
-        verification_token_secret: секрет для токенов подтверждения email.
-    """
     user_db_model = User
     reset_password_token_secret = settings.SECRET
     verification_token_secret = settings.SECRET
+
+    async def on_after_forgot_password(self, user: User, token: str, request=None):
+        reset_link = f"http://localhost:3000/reset-password/{token}"
+        asyncio.create_task(send_reset_password_email(user.email, reset_link))
 
 
 async def get_user_manager():

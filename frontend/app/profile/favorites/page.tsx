@@ -2,11 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../profile.module.css";
-
 import { LotSmallCard } from "@/app/interfaces/ILot";
 import { fetchSingleLot } from "../../apiRequests/lotsRequests";
-import { fetchCurrentUser } from "../../apiRequests/userRequests";
-import { useAuth } from "../../components/hooks/Auth";
 import Loader from "@/app/components/Loader/Loader";
 import AuctionLotCardSmall from "@/app/components/AuctionList/AuctionLotCard";
 
@@ -14,27 +11,35 @@ const FavoriteLotsGrid: React.FC = () => {
   const [favoriteLots, setFavoriteLots] = useState<LotSmallCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
-
     const loadData = async () => {
       try {
-        if (isAuthLoading) return;
+        setLoading(true);
 
-        if (!isAuthenticated) {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) {
           throw new Error("Требуется авторизация");
         }
 
-        const userData = await fetchCurrentUser();
+        const userData = await res.json();
 
-        if (!userData?.favorite_lots || userData.favorite_lots.length === 0) {
+        if (
+          !userData ||
+          !Array.isArray(userData.favorite_lots) ||
+          userData.favorite_lots.length === 0
+        ) {
+          if (isMounted) setFavoriteLots([]);
           return;
         }
 
         const lotsData = await Promise.all(
-          userData.favorite_lots.map((id: { toString: () => string }) =>
+          userData.favorite_lots.map((id: number) =>
             fetchSingleLot(id.toString()).catch(() => null)
           )
         );
@@ -58,24 +63,7 @@ const FavoriteLotsGrid: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, isAuthLoading]);
-
-  if (isAuthLoading) {
-    return (
-      <div className={styles.wrapper}>
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className={styles.wrapper}>
-        <div className={styles.error}>Требуется авторизация</div>
-        <p>Пожалуйста, войдите в систему</p>
-      </div>
-    );
-  }
+  }, []);
 
   if (loading) {
     return (
@@ -89,6 +77,9 @@ const FavoriteLotsGrid: React.FC = () => {
     return (
       <div className={styles.wrapper}>
         <div className={styles.error}>{error}</div>
+        {error === "Требуется авторизация" && (
+          <p>Пожалуйста, войдите в систему</p>
+        )}
       </div>
     );
   }

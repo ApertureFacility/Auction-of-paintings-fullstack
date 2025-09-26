@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Input from "@/app/components/Inputs/Inputs";
 import styles from "./PersonalPage.module.css";
-import { fetchCurrentUser, requestVerification } from "@/app/apiRequests/userRequests";
+import { getCurrentUser, requestVerification } from "@/app/apiRequests/userRequests";
 import Button from "@/app/components/Button/Button";
 import Loader from "@/app/components/Loader/Loader";
 
@@ -29,7 +29,7 @@ function PersonalPage() {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const data = await fetchCurrentUser();
+        const data = await getCurrentUser();
         setUserData(data);
         setEditableData({ username: data.username, newEmail: "" });
       } catch (err) {
@@ -42,7 +42,7 @@ function PersonalPage() {
 
     fetchUserData();
   }, []);
-
+  
   const handleVerify = async () => {
     if (!userData) return;
     try {

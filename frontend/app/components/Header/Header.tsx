@@ -10,13 +10,15 @@ const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const openModal = useModalStore((state) => state.open);
 
-  const { isAuthenticated, logout, verifyToken } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, logout, verifyAuth } = useAuthStore();
 
   useEffect(() => {
-    verifyToken();
-  }, [verifyToken]);
-
+    (async () => {
+      await verifyAuth();
+    })();
+  }, [verifyAuth]);
+  
   const toggleProfileMenu = () => setIsProfileMenuOpen((prev) => !prev);
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 

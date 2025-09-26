@@ -1,4 +1,4 @@
-import { RegisterPayload } from "../interfaces/IUser";
+import { RegisterPayload, UserData } from "../interfaces/IUser";
 import { getBaseUrl } from "../lib/api";
 
 
@@ -65,33 +65,6 @@ export async function addLotToFavorites(lotId: number) {
   return true;
 }
 
-export async function fetchCurrentUser() {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-  if (!token) return null;
-
-  try {
-    const res = await fetch(`${BASE}/users/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        localStorage.removeItem("access_token");
-        return null;
-      }
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    return await res.json();
-  } catch (err) {
-    console.error("Error fetching user data:", err);
-    return null;
-  }
-}
 
 export const removeLotFromFavorites = async (lotId: string) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
@@ -108,6 +81,8 @@ export const removeLotFromFavorites = async (lotId: string) => {
   }
   return res.json();
 };
+
+
 export async function forgotPassword(email: string) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/forgot-password`, {
     method: "POST",
@@ -138,3 +113,33 @@ export async function resetPassword(token: string, newPassword: string) {
   return data;
 }
 
+export async function loginUserCookie({ email, password }: { email: string; password: string }) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/cookie/login-refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ email, password }),
+    credentials: "include", 
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Ошибка авторизации");
+  }
+  const data = await res.json();
+  return data;
+}
+
+
+
+export const getCurrentUser = async (): Promise<UserData> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error("Ошибка при получении пользователя");
+  }
+
+  return res.json();
+};
