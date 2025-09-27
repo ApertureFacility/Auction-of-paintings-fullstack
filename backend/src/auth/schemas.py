@@ -1,17 +1,21 @@
 from fastapi_users import schemas
 from typing import List
+from pydantic import BaseModel
 
-
-
-class UserRead(schemas.BaseUser[int]):
-    """ Схема для чтения данных пользователя (ответ API)."""
+class UserReadBase(schemas.BaseUser[int]):
+    """Базовая схема пользователя без ленивых связей"""
     username: str
-    favorite_lots: List[int] = [] 
+
+class UserRead(UserReadBase):
+    """Схема для чтения пользователя с любимыми лотами"""
+    favorite_lots: List[int] = []
+
+class UserReadWithoutFavorites(UserReadBase):
+    """Схема для регистрации и базовых эндпоинтов (без favorite_lots)"""
+    pass
 
 class UserCreate(schemas.BaseUserCreate):
-    """ Схема для создания нового пользователя (запрос API). """
     username: str
 
 class UserUpdate(schemas.BaseUserUpdate):
-    """ Схема для обновления данных пользователя (запрос API). """
     username: str

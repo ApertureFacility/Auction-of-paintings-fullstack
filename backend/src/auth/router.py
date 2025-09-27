@@ -1,6 +1,5 @@
-# src/auth/router.py
 from types import SimpleNamespace
-
+from src.auth.schemas import UserRead, UserReadWithoutFavorites, UserCreate, UserUpdate
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,7 +10,6 @@ from src.core.db import get_db
 from src.auth.dependencies import (
     current_active_user,
     fastapi_users,
-    auth_backend,
     get_access_strategy,
     get_refresh_strategy,
     get_user_manager,
@@ -54,20 +52,19 @@ async def get_current_user_with_favorites(
 
 
 
-router.include_router(
-    fastapi_users.get_auth_router(auth_backend),
-    prefix="/auth/cookie",
-    tags=["auth"],
-)
+
+
+
 
 router.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
+    fastapi_users.get_register_router(UserReadWithoutFavorites, UserCreate),
     prefix="/auth",
     tags=["auth"],
 )
 
+
 router.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
+    fastapi_users.get_users_router(UserReadWithoutFavorites, UserUpdate),
     prefix="/users",
     tags=["users"],
 )
