@@ -18,9 +18,13 @@ export async function requestVerification(email: string) {
 export async function registerUser(payload: RegisterPayload) {
   const res = await fetch(`${BASE}/auth/register`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
     body: JSON.stringify(payload),
   });
+  
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.detail || "Ошибка регистрации");
@@ -28,27 +32,23 @@ export async function registerUser(payload: RegisterPayload) {
   return res.json();
 }
 
-export async function loginUser({ email, password }: { email: string; password: string }) {
-  const formData = new URLSearchParams();
-  formData.append("grant_type", "password");
-  formData.append("username", email);
-  formData.append("password", password);
 
-  const res = await fetch(`${BASE}/auth/jwt/login`, {
+export async function loginUser({ email, password }: { email: string; password: string }) {
+  const res = await fetch(`${BASE}/auth/cookie/login-refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: formData.toString(),
+    headers: { "Content-Type": "application/json", "accept": "application/json" },
+    credentials: "include", 
+    body: JSON.stringify({ email, password }),
   });
 
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Ошибка авторизации");
   }
 
-  const data = await res.json();
-  localStorage.setItem("access_token", data.access_token);
-  return data;
+  return res.json(); 
 }
+
 
 export async function addLotToFavorites(lotId: number) {
   const token = localStorage.getItem("access_token");
