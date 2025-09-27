@@ -21,8 +21,15 @@ class NewsBase(BaseModel):
 class NewsCreate(NewsBase):
     pass  
 
-class NewsUpdate(NewsBase):
-    pass  
+
+class NewsUpdate(BaseModel):
+    big_title: Optional[str] = None
+    big_text: Optional[str] = None
+    image1_url: Optional[Union[str, None]] = None
+    small_title: Optional[str] = None
+    small_text: Optional[str] = None
+    image2_url: Optional[Union[str, None]] = None
+    published_at: Optional[datetime] = None
 
 
 

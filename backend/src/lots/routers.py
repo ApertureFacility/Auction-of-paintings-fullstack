@@ -17,7 +17,7 @@ router = APIRouter(prefix="/lots", tags=["Lots"])
 
 @router.post("/", response_model=LotRead)
 async def create_lot(lot: LotCreate, db: AsyncSession = Depends(get_db)):
-    data = lot.dict()
+    data = lot.model_dump()
 
 
     if data.get("start_time") and data["start_time"].tzinfo is not None:
