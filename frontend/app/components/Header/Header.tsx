@@ -11,14 +11,9 @@ const Header = () => {
   const openModal = useModalStore((state) => state.open);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, logout, verifyAuth } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
 
-  useEffect(() => {
-    (async () => {
-      await verifyAuth();
-    })();
-  }, [verifyAuth]);
-  
   const toggleProfileMenu = () => setIsProfileMenuOpen((prev) => !prev);
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
@@ -56,57 +51,59 @@ const Header = () => {
         </div>
 
         <div className={styles.profileWrapper}>
-  {isAuthenticated && (
-    <><div className={styles.authButton} onClick={toggleProfileMenu}>
-    <img
-      src="/userSquare.svg"
-      alt="Профиль"
-      className={styles.iconBasket}
-    />
-    <span>Профиль</span>
-  </div>
-      {isProfileMenuOpen && (
-        <div className={styles.profileDropdown}>
-          <Link href="/profile/personal">
-            <button
-              className={styles.profileMenuButton}
-              onClick={() => setIsProfileMenuOpen(false)}
-            >
-              <img src="/ProfileInfo.svg" alt="Данные" />
-              <span>Персональные данные</span>
-            </button>
-          </Link>
+          {isAuthenticated && (
+            <>
+              <div className={styles.authButton} onClick={toggleProfileMenu}>
+                <img
+                  src="/userSquare.svg"
+                  alt="Профиль"
+                  className={styles.iconBasket}
+                />
+                <span>Профиль</span>
+              </div>
+              {isProfileMenuOpen && (
+                <div className={styles.profileDropdown}>
+                  <Link href="/profile/personal">
+                    <button
+                      className={styles.profileMenuButton}
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <img src="/ProfileInfo.svg" alt="Данные" />
+                      <span>Персональные данные</span>
+                    </button>
+                  </Link>
 
-          <Link href="/profile/favorites">
-            <button
-              className={styles.profileMenuButton}
-              onClick={() => setIsProfileMenuOpen(false)}
-            >
-              <img src="/star.svg" alt="Избранное" />
-              <span>Избранные лоты</span>
-            </button>
-          </Link>
+                  <Link href="/profile/favorites">
+                    <button
+                      className={styles.profileMenuButton}
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <img src="/star.svg" alt="Избранное" />
+                      <span>Избранные лоты</span>
+                    </button>
+                  </Link>
 
-          <button
-            className={styles.profileMenuButton}
-            onClick={() => setIsProfileMenuOpen(false)}
-          >
-            <img src="/shop.svg" alt="Покупки" />
-            <span>История покупок</span>
-          </button>
+                  <Link href="/profile/purchases">
+                    <button
+                      className={styles.profileMenuButton}
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <img src="/shop.svg" alt="Покупки" />
+                      <span>История покупок</span>
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
+
+          <img
+            src="/Burger.svg"
+            alt="Меню"
+            className={styles.iconBurger}
+            onClick={toggleMenu}
+          />
         </div>
-      )}
-    </>
-  )}
-
-  <img
-    src="/Burger.svg"
-    alt="Меню"
-    className={styles.iconBurger}
-    onClick={toggleMenu}
-  />
-</div>
-
       </div>
 
       <SearchInput
@@ -115,7 +112,6 @@ const Header = () => {
           throw new Error("Function not implemented.");
         }}
       />
-
       {isMenuOpen && (
         <div className={styles.burgerMenu}>
           <a href="#">preferred access</a>

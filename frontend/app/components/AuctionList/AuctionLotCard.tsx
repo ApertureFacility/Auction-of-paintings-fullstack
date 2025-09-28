@@ -31,7 +31,7 @@ const AuctionLotCardSmall = ({
 
     if (isFavorite && onRemoveFavorite) {
       try {
-        await removeLotFromFavorites(lot.id.toString());
+        await removeLotFromFavorites(lot.id);;
         toast.success("Лот удален из избранного");
         onRemoveFavorite(lot.id);
       } catch (err: any) {

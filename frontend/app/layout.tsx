@@ -1,3 +1,5 @@
+
+import { useEffect } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -6,6 +8,8 @@ import Footer from "./components/Footer/Footer";
 import ModalManager from "./components/Modals/ModalManager";
 import { ImageZoomModal } from "./components/Modals/ImageZoomModal/ImageZoomModal";
 import { ToastContainer } from "react-toastify";
+import { useAuthStore } from "./lib/authStore"; // <-- импорт сторы
+import AuthProvider from "./lib/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,15 +31,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+ 
   return (
     <html lang="ru">
       <body>
+        <AuthProvider>
         <Header />
         <ToastContainer/>
         <ModalManager />
         <ImageZoomModal />
         <main>{children}</main>
         <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -50,37 +50,42 @@ export async function loginUser({ email, password }: { email: string; password: 
 }
 
 
-export async function addLotToFavorites(lotId: number) {
-  const token = localStorage.getItem("access_token");
-  if (!token) throw new Error("Сначала войдите в аккаунт");
 
+export async function addLotToFavorites(lotId: number) {
   const res = await fetch(`${BASE}/favorites/add/${lotId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    credentials: "include", 
   });
+
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.detail || "Не удалось добавить в избранное");
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Не удалось добавить лот в избранное");
   }
+
   return true;
 }
 
-
-export const removeLotFromFavorites = async (lotId: string) => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-  if (!token) throw new Error("Сначала войдите в аккаунт");
-
+export async function removeLotFromFavorites(lotId: number) {
   const res = await fetch(`${BASE}/favorites/remove/${lotId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    credentials: "include",
   });
 
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Не удалось удалить лот из избранного");
   }
-  return res.json();
-};
+
+  return true;
+}
 
 
 export async function forgotPassword(email: string) {
