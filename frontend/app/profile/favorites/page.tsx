@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import styles from "../profile.module.css";
 import { LotSmallCard } from "@/app/interfaces/ILot";
 import { fetchSingleLot } from "../../apiRequests/lotsRequests";
-import Loader from "@/app/components/Loader/Loader";
 import AuctionLotCardSmall from "@/app/components/AuctionList/AuctionLotCard";
+import SkeletonCard from "./SkeletonCard";
 
 const FavoriteLotsGrid: React.FC = () => {
   const [favoriteLots, setFavoriteLots] = useState<LotSmallCard[]>([]);
@@ -68,7 +68,11 @@ const FavoriteLotsGrid: React.FC = () => {
   if (loading) {
     return (
       <div className={styles.wrapper}>
-        <Loader />
+        <div className={styles.grid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }
