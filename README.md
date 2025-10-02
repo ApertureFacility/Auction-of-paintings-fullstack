@@ -30,12 +30,24 @@
 * PostgreSQL
 * Mailhog (SMTP тестирование)
 
----
 ## 📸 Скриншоты приложения
 
-### Главная лота
-![Страница лота верхняя часть](ReadmeImages/Screenshot_lot.png)
-![Главная страница аукциона](ReadmeImages/Screenshot_main.png)
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="ReadmeImages/Screenshot_lot.png" alt="Страница лота" width="300"/><br>
+      <b>Страница лота верхняя часть</b>
+    </td>
+    <td align="center">
+      <img src="ReadmeImages/Screenshot_main.png" alt="Главная страница аукциона" width="300"/><br>
+      <b>Главная страница аукциона</b>
+    </td>
+  </tr>
+</table>
+
+</div>
 
 
 ## 📂 Структура проекта
